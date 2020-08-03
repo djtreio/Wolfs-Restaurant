@@ -1,9 +1,6 @@
 package CP317;
 import java.sql.*;
-import java.util.*;
-import java.util.Date;
-import java.text.*;
-import java.math.*;
+
 
 class OrderType{
 	public int id;
@@ -15,7 +12,7 @@ class OrderType{
 class ItemType{
 	public int id;
 	public int orderid;
-	public String name;
+	public String name = "";
 	public String side;
 	public String allergy;
 	public float price;
@@ -30,7 +27,14 @@ public class OrderDatabase {
 	public static void main(String[] args) {
 		//testOrders();
 		
-		testItems();
+		//testItems();
+		
+		//OrderType order = getOrder(40);
+		//System.out.println(order.id + " " + order.price + " " + order.discount + " " + order.finalPrice);
+		
+		ItemType item = getItem(40, 6);
+		System.out.println(item.id + " " + item.orderid + " " + item.name + " " + item.side + " " + item.allergy + " " + item.price + " " + item.discount + " " + item.notes);
+		
 	}
 	
 	public static void addOrder(OrderType order) {
@@ -175,6 +179,79 @@ public class OrderDatabase {
 	}
 	
 	
+	public static OrderType getOrder(int orderid) {
+		try {
+			Connection conn = databaseConnect();
+
+			OrderType order;		
+			
+			String sql = "SELECT * FROM Orders WHERE id = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setInt(1, orderid);
+			
+			ResultSet result = statement.executeQuery();
+			
+			order = new OrderType();
+			order.id = result.getInt("id");
+			order.price = result.getFloat("price");
+			order.discount = result.getFloat("discount");
+			order.finalPrice = result.getFloat("finalprice");
+			
+                
+			statement.close();
+			conn.close();
+			
+			return order;
+			}
+			catch(Exception e) {
+				System.out.println("Error in getOrder");
+				e.printStackTrace();
+			}
+		
+		return null;
+	}
+	
+	public static ItemType getItem(int orderid, int itemid) {
+		try {
+			
+			Connection conn = databaseConnect();
+			
+			ItemType item;			
+			
+			String sql = "SELECT * FROM Items WHERE orderid = ? AND id = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			
+			statement.setInt(1, orderid);
+			statement.setInt(2, itemid);
+			
+			ResultSet result = statement.executeQuery();
+			
+			item = new ItemType();
+			if (result.next()) {
+			item.id = result.getInt("id");
+			item.orderid = result.getInt("orderid");
+			item.name = result.getString("name");
+			item.side = result.getString("side");
+			item.allergy = result.getString("allergy");
+			item.price = result.getFloat("price");
+			item.discount = result.getFloat("discount");
+			item.notes = result.getString("notes");
+			}
+                
+			statement.close();
+			conn.close();
+			
+			return item;
+			}
+			catch(Exception e) {
+				System.out.println("Error in getItem");
+				e.printStackTrace();
+			}
+		
+		return null;
+	}
+	
+	
 	public static void setOrder(OrderType order) {
 		try {
 			
@@ -226,15 +303,16 @@ public class OrderDatabase {
 		}
 	}
 	
-	public static void removeItem(int itemid) {
+	public static void removeItem(int orderid, int itemid) {
 		try {
 			
 			Connection conn = databaseConnect();
 			
-			String sql = "DELETE FROM Items WHERE id = ?";
+			String sql = "DELETE FROM Items WHERE id = ? AND orderid = ?";
 			
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setInt(1, itemid);
+			statement.setInt(2, orderid);
 			
 			statement.executeUpdate();
 			
@@ -242,7 +320,7 @@ public class OrderDatabase {
 			conn.close();
 			}
 			catch(Exception e) {
-				System.out.println("Error in setItem");
+				System.out.println("Error in removeItem");
 				e.printStackTrace();
 			}
 	}
@@ -338,7 +416,7 @@ public class OrderDatabase {
 			System.out.println(items[i].id + " " + items[i].orderid + " " + items[i].name + " " + items[i].side + " " + items[i].allergy + " " + items[i].price + " " + items[i].discount + " " + items[i].notes);
 		}
 		
-		removeItem(item.id);
+		removeItem(item.id, item.orderid);
 		
 		
 		items = getItems(item.orderid);

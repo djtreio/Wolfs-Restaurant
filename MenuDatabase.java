@@ -1,3 +1,5 @@
+package CP317;
+
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -6,7 +8,7 @@ import java.math.*;
 
 
 public class MenuDatabase {
-	private static final String ConnectionString = "jdbc:sqlite:/Users/braedensmith/Desktop/Wolfs.db";
+	private static final String ConnectionString = "jdbc:sqlite:Wolfs.sql";
 
 	//Testing function
 	public static void main(String[] args) {
@@ -21,22 +23,22 @@ public class MenuDatabase {
 		}
 		
 		//Test getMenuItem
-		String searchname = "Item 12.35";
+		int searchname = 11;
 		MenuType result = getMenuItem(searchname);
 		System.out.println("\n" + result.id + " " + result.name);
 		
-		searchname = "idk";
+		searchname = 14;
 		result = getMenuItem(searchname);
 		System.out.println("\n" + result.id + " " + result.name);
 		
 		//Test editMenuItem
-		MenuType toEdit = getMenuItem("Item 12.35");
+		MenuType toEdit = getMenuItem(15);
 		toEdit.editItem("price", "500");
-		result = getMenuItem("Item 12.35");
+		result = getMenuItem(16);
 		System.out.println("\n" + result.id + " " + result.name + " " + result.price);
 		
 		//Test removeMenuItem
-		MenuType toRemove = getMenuItem("Item 33.4");
+		MenuType toRemove = getMenuItem(17);
 		toRemove.removeItem();
 	}
 	
@@ -68,35 +70,28 @@ public class MenuDatabase {
 	
 	//GOOD
 	//Retrieves a menutype item from the database
-	public static MenuType getMenuItem(String name) {
+	public static MenuType getMenuItem(int id) {
 		MenuType menuItem = new MenuType("Null","","n",0,0);
 
 		try {
 			Connection conn = databaseConnect();
-		
-			Statement statement = conn.createStatement();
+	
+			String sql = "SELECT * FROM Menu WHERE id = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setInt(1, id);
 			
-			String sql = "SELECT COUNT(*) FROM Menu";
-			ResultSet result = statement.executeQuery(sql);
+			ResultSet result = statement.executeQuery();
 			
-			sql = "SELECT * FROM Menu";
-			
-			result = statement.executeQuery(sql);
-			
-			while (result.next()) {
-				if (name.equals(result.getString("name"))) {
-					menuItem.id = result.getInt("id");
-					menuItem.name = result.getString("name");
-					menuItem.category = result.getString("category");
-					menuItem.price = result.getFloat("price");
-					menuItem.status = result.getString("status");
-					menuItem.cost = result.getFloat("cost");
-					break;
-				}
-			}
+			menuItem.id = result.getInt("id");
+			menuItem.name = result.getString("name");
+			menuItem.category = result.getString("category");
+			menuItem.price = result.getFloat("price");
+			menuItem.status = result.getString("status");
+			menuItem.cost = result.getFloat("cost");
+
 			
 			if (menuItem.id == 0) {
-				System.out.println("No menu item found with name " + name);
+				System.out.println("No menu item found with name " + Integer.toString(id));
 			}
 			
 			statement.close();

@@ -9,8 +9,6 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,8 +18,13 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public class GUI {
+	
+	int orderid = 0;
+	OrderType order;
 
 	private JFrame frame;
 	private final JPanel panel = new JPanel();
@@ -523,7 +526,7 @@ public class GUI {
 	}
 	
 	private JFrame Oframe;
-	private final JList Olist = new JList();
+	private final JList<String> Olist = new JList<String>();
 	private final JLabel OlblOrders = new JLabel("Orders");
 	private final JButton ObtnOK = new JButton("OK");
 	private final JButton ObtnCancel = new JButton("Cancel");
@@ -536,6 +539,24 @@ public class GUI {
 		Oframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Oframe.getContentPane().setLayout(null);
 		Olist.setBounds(322, 51, 420, 333);
+		
+		OrderType[] orders = OrderController.GetOrders();
+		String[] orderList = new String[orders.length+1];
+		orderList[0] = String.format("%-15s %10s", "Order ID", "Price");
+		for (int i=0;i<orders.length;i++) {
+			orderList[i+1] = String.format("%-15d %15.2f", orders[i].id, orders[i].finalPrice);
+		}
+		
+		Olist.addListSelectionListener(new ListSelectionListener() {
+		    public void valueChanged(ListSelectionEvent event) {
+		        if (!event.getValueIsAdjusting()){
+		        	String temp = Olist.getSelectedValue();
+		            OrderController.orderid = Integer.parseInt(temp.substring(0,temp.indexOf(" ")));
+		        }
+		    }
+		});
+		
+		Olist.setListData(orderList);
 		
 		Oframe.getContentPane().add(Olist);
 		OlblOrders.setBounds(360, 11, 48, 14);
@@ -552,16 +573,9 @@ public class GUI {
 		Oframe.getContentPane().add(ObtnNewOrder);
 		
 		
-		ObtnCancel.addActionListener(new ActionListener() {
+		ObtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Oframe.setVisible(false);
-				Oframe.dispose();
-				initialize();
-			}
-		});
-		
-		ObtnNewOrder.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+				OrderController.order = OrderController.GetOrder(OrderController.orderid);
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -576,12 +590,37 @@ public class GUI {
 			}
 		});
 		
+		ObtnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Oframe.setVisible(false);
+				Oframe.dispose();
+				initialize();
+			}
+		});
+		
+		ObtnNewOrder.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OrderController.CreateOrder();
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							Oframe.setVisible(false);
+							Oframe.dispose();
+							new GUI("Orders");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		
 		Oframe.setVisible(true);
 	}
 	
 	
 	private JFrame OLframe;
-	private final JList OLlist = new JList();
+	private final JList<String> OLlist = new JList<String>();
 	private final JButton OLbtnAdd = new JButton("Add");
 	private final JButton OLbtnRemove = new JButton("Remove");
 	private final JButton OLbtnEdit = new JButton("Edit");
@@ -628,6 +667,40 @@ public class GUI {
 		OLframe.getContentPane().add(OLlblDiscount);
 		
 		
+		OLtxtDiscount.setText(Float.toString(OrderController.order.discount));
+		
+		ItemType[] items = OrderController.GetItems(OrderController.orderid);
+		String[] itemList = new String[items.length+1];
+		itemList[0] = String.format("%-15s %-15s %-15s %-15s %-15s", "ID", "Name", "Side", "Allergy", "Price");
+		for (int i=0;i<items.length;i++) {
+			itemList[i+1] = String.format("%-15d %-15s %-15s %-15s %-15.2f", items[i].id, items[i].name, items[i].side, items[i].allergy, items[i].price-items[i].discount);
+		}
+		
+		OLlist.addListSelectionListener(new ListSelectionListener() {
+		    public void valueChanged(ListSelectionEvent event) {
+		        if (!event.getValueIsAdjusting()){
+		        	String temp = OLlist.getSelectedValue();
+		            OrderController.itemid = Integer.parseInt(temp.substring(0,temp.indexOf(" ")));
+		        }
+		    }
+		});
+		
+		
+		OLlist.setListData(itemList);
+		
+		
+		OLbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OrderController.order.discount = Float.parseFloat(OLtxtDiscount.getText());
+				OrderController.SetOrder(OrderController.order);
+				
+				OLframe.setVisible(false);
+				OLframe.dispose();
+				initializeO();
+			}
+		});
+		
+		
 		OLbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OLframe.setVisible(false);
@@ -638,6 +711,7 @@ public class GUI {
 		
 		OLbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				OrderController.item = OrderController.GetItem(OrderController.orderid,OrderController.itemid);
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -651,6 +725,42 @@ public class GUI {
 				});
 			}
 		});
+		
+		OLbtnAdd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OrderController.item = new ItemType();
+				OrderController.itemid = -1;
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							OLframe.setVisible(false);
+							OLframe.dispose();
+							new GUI("OrderItem");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		
+		OLbtnRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OrderController.RemoveItem(OrderController.orderid, OrderController.itemid);
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							OLframe.setVisible(false);
+							OLframe.dispose();
+							new GUI("OrderList");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		
 		
 		
 		OLframe.setVisible(true);
@@ -824,7 +934,6 @@ public class GUI {
 		gbc_OIbtnCancel.gridy = 0;
 		OIpanel5.add(OIbtnCancel, gbc_OIbtnCancel);
 		
-		
 		OIbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OIframe.setVisible(false);
@@ -833,6 +942,31 @@ public class GUI {
 			}
 		});
 		
+		OIbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ItemType item = new ItemType();
+				item.id = OrderController.itemid;
+				item.orderid = OrderController.orderid;
+				item.discount = Float.parseFloat(OItxtDiscount.getText());
+				item.name = OItxtItem.getText();
+				item.side = OItxtSide.getText();
+				item.allergy = OItxtAllergy.getText();
+				item.notes = OItxtNotes.getText();
+				
+				OrderController.SetItem(item);
+				
+				OIframe.setVisible(false);
+				OIframe.dispose();
+				initializeOL();
+			}
+		});
+		
+		
+		OItxtItem.setText(OrderController.item.name);
+		OItxtSide.setText(OrderController.item.side);
+		OItxtAllergy.setText(OrderController.item.allergy);
+		OItxtNotes.setText(OrderController.item.notes);
+		OItxtDiscount.setText(Float.toString(OrderController.item.discount));
 		
 		
 		
@@ -841,7 +975,7 @@ public class GUI {
 	
 	
 	private JFrame MLframe;
-	private final JList MLlist = new JList();
+	private final JList<String> MLlist = new JList<String>();
 	private final JButton MLbtnAdd = new JButton("Add");
 	private final JButton MLbtnRemove = new JButton("Remove");
 	private final JButton MLbtnEdit = new JButton("Edit");
@@ -878,7 +1012,59 @@ public class GUI {
 		MLframe.getContentPane().add(MLbtnCancel);
 		
 		
+		
+		
+		MenuType[] items = MenuController.getMenu();
+		String[] itemList = new String[items.length+1];
+		itemList[0] = String.format("%-15s %-15s %-15s %-15s", "ID", "Name", "Category", "Price");
+		for (int i=0;i<items.length;i++) {
+			itemList[i+1] = String.format("%-15d %-15s %-15s %-15.2f", items[i].id, items[i].name, items[i].category, items[i].price);
+		}
+		
+		MLlist.addListSelectionListener(new ListSelectionListener() {
+		    public void valueChanged(ListSelectionEvent event) {
+		        if (!event.getValueIsAdjusting()){
+		        	String temp = MLlist.getSelectedValue();
+		            MenuController.menuid = Integer.parseInt(temp.substring(0,temp.indexOf(" ")));
+		            for (int i=0;i<items.length;i++) {
+		            	if (items[i].id == MenuController.menuid) {
+		            		MenuController.menu = items[i];
+		            	}
+		            }
+		        }
+		    }
+		});
+		
+		
+		MLlist.setListData(itemList);
+		
+		
+		MLbtnRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MenuController.removefromMenu(MenuController.menu);
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							MLframe.setVisible(false);
+							MLframe.dispose();
+							new GUI("MenuList");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		
 		MLbtnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MLframe.setVisible(false);
+				MLframe.dispose();
+				initialize();
+			}
+		});
+		
+		MLbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MLframe.setVisible(false);
 				MLframe.dispose();
@@ -888,14 +1074,31 @@ public class GUI {
 		
 		MLbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				System.out.print(MenuController.menu.id);
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
 							MLframe.setVisible(false);
 							MLframe.dispose();
 							new GUI("MenuItem");
-					
-							
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		
+		MLbtnAdd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MenuController.menuid = -1;
+				MenuController.menu = new MenuType("","","y",0,0);
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							MLframe.setVisible(false);
+							MLframe.dispose();
+							new GUI("MenuItem");
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -916,6 +1119,8 @@ public class GUI {
 	private final JTextField MItxtPrice = new JTextField();
 	private final JButton MIbtnOK = new JButton("OK");
 	private final JButton MIbtnCancel = new JButton("Cancel");
+	private final JLabel MIlblCategory = new JLabel("Category");
+	private final JTextField MItxtCategory = new JTextField();
 	
 	
 	private void initializeMI() {
@@ -947,10 +1152,35 @@ public class GUI {
 		MIbtnCancel.setBounds(335, 216, 89, 23);
 		
 		MIframe.getContentPane().add(MIbtnCancel);
+		MIlblCategory.setBounds(167, 73, 48, 14);
 		
+		MIframe.getContentPane().add(MIlblCategory);
+		MItxtCategory.setColumns(10);
+		MItxtCategory.setBounds(166, 89, 96, 20);
+		
+		MIframe.getContentPane().add(MItxtCategory);
+		
+		
+		MItxtName.setText(MenuController.menu.name);
+		MItxtCategory.setText(MenuController.menu.category);
+		MItxtPrice.setText(Float.toString(MenuController.menu.price));
 		
 		MIbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				MIframe.setVisible(false);
+				MIframe.dispose();
+				initializeML();
+			}
+		});
+		
+		MIbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MenuController.menu.name = MItxtName.getText();
+				MenuController.menu.category = MItxtCategory.getText();
+				MenuController.menu.price = Float.parseFloat(MItxtPrice.getText());
+				
+				MenuController.setMenuItem(MenuController.menu);
+				
 				MIframe.setVisible(false);
 				MIframe.dispose();
 				initializeML();

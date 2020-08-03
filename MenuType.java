@@ -1,3 +1,5 @@
+package CP317;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
@@ -24,7 +26,8 @@ public class MenuType {
 		try {
 			Connection conn = MenuDatabase.databaseConnect();
 			
-			String sql = "UPDATE Menu SET " + attrib + " = ? WHERE name = ?";
+			String sql = "UPDATE Menu SET " + attrib + " = ? WHERE id = ?";
+
 			PreparedStatement statement = conn.prepareStatement(sql);
 			
 			if (attrib.equals("price") | attrib.equals("cost")) {
@@ -33,7 +36,8 @@ public class MenuType {
 			else {
 				statement.setString(1, value);
 			}
-			statement.setString(2,this.name);
+
+			statement.setInt(2,this.id);
 			
 			statement.executeUpdate();
 			statement.close();
