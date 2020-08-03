@@ -1,1 +1,1 @@
-# Wolfs Restaurant Management System
+# Wolf's Restaurant Management System
