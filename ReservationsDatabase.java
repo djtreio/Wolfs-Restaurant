@@ -50,7 +50,26 @@ public class ReservationsDatabase {
 			e.printStackTrace();
 		}
 	}
-	
+	public static void removeBooking(int itemid) {
+		try {
+			
+			Connection conn = databaseConnect();
+			
+			String sql = "DELETE FROM Bookings WHERE id = ?";
+			
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setInt(1, itemid);
+			
+			statement.executeUpdate();
+			
+			statement.close();
+			conn.close();
+			}
+			catch(Exception e) {
+				System.out.println("Error in RemoveBooking");
+				e.printStackTrace();
+			}
+	}
 	public static BookingInfo[] getBooking() {
 		try {
 			
