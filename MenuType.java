@@ -9,6 +9,15 @@ public class MenuType {
 	public float price = 0;
 	public float cost = 0;
 	
+	public MenuType(String name, String category, String status, float price, float cost) {
+		this.name = name;
+		this.category = category;
+		this.status = status;
+		this.price = price;
+		this.cost = cost;
+	}
+	
+	
 	//GOOD
 	//Edits an attribute of a menu item
 	public void editItem(String attrib, String value) {

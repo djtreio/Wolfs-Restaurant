@@ -11,11 +11,7 @@ public class MenuDatabase {
 	//Testing function
 	public static void main(String[] args) {
 		//Test addMenuItem
-		MenuType menuItem = new MenuType();
-		menuItem.price = (float)(Math.round((Math.random() * 50 + 10)*100.0)/100.0);
-		menuItem.cost = (float)(Math.round((Math.random() * 20)*100.0)/100.0);
-		menuItem.name = "Item "+ (Math.round((Math.random() * 50 + 10)*100.0)/100.0);
-		menuItem.category = "Food";
+		MenuType menuItem = new MenuType("Item "+ (Math.round((Math.random() * 50 + 10)*100.0)/100.0),"Food","y",(float)(Math.round((Math.random() * 50 + 10)*100.0)/100.0),(float)(Math.round((Math.random() * 20)*100.0)/100.0));
 		addMenuItem(menuItem);
 		
 		//Test getMenuItems
@@ -73,13 +69,8 @@ public class MenuDatabase {
 	//GOOD
 	//Retrieves a menutype item from the database
 	public static MenuType getMenuItem(String name) {
-		MenuType menuItem = new MenuType();
-		menuItem.id = 0;
-		menuItem.name = "";
-		menuItem.category = "";
-		menuItem.price = 0;
-		menuItem.status = "n";
-		menuItem.cost = 0;
+		MenuType menuItem = new MenuType("Null","","n",0,0);
+
 		try {
 			Connection conn = databaseConnect();
 		
@@ -141,13 +132,8 @@ public class MenuDatabase {
 			
 			int i = 0;
 			while (result.next()) {
-				menuItems[i] = new MenuType();
+				menuItems[i] = new MenuType(result.getString("name"),result.getString("category"),result.getString("status"),result.getFloat("price"),result.getFloat("cost"));
 				menuItems[i].id = result.getInt("id");
-				menuItems[i].name = result.getString("name");
-				menuItems[i].category = result.getString("category");
-				menuItems[i].price = result.getFloat("price");
-				menuItems[i].status = result.getString("status");
-				menuItems[i].cost = result.getFloat("cost");
 				i++;
 			}
 			
