@@ -88,17 +88,15 @@ public class TablesDatabase {
 	 * get all table states from database
 	 * takes results from SQL statement and stores in TablesInfo list
 	 */
-	
 	public static TablesInfo getTables() {
 		try {
 
 			Connection conn = databaseConnect();
 			Statement statement = conn.createStatement();
 
-			
-
 			TablesInfo tables = new TablesInfo();
-
+			
+			//SQL code selecting all current states from Tables db
 			String sql = "SELECT * FROM Tables";
 
 			ResultSet result = statement.executeQuery(sql);
