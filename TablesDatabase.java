@@ -1,3 +1,4 @@
+
 package CP317;
 
 import java.sql.Connection;
@@ -6,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 
 //Class for storing table states
 class TablesInfo {
@@ -60,6 +62,7 @@ public class TablesDatabase {
 			//SQL update table update code
 			String sql = "UPDATE Tables SET T1 = ?, T2 = ?, T3 = ?, T4 = ?, T5 = ?, T6 = ?, T7 = ?, T8 = ?, T9 = ?, T10 = ?, T11 = ?, T12 = ? WHERE id = 0";
 
+
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setInt(1, tables.T1);
 			statement.setInt(2, tables.T2);
@@ -83,16 +86,19 @@ public class TablesDatabase {
 			e.printStackTrace();
 		}
 	}
+
 	
 	/**
 	 * get all table states from database
 	 * takes results from SQL statement and stores in TablesInfo list
 	 */
 	public static TablesInfo getTables() {
+
 		try {
 
 			Connection conn = databaseConnect();
 			Statement statement = conn.createStatement();
+
 
 			TablesInfo tables = new TablesInfo();
 			
@@ -115,6 +121,7 @@ public class TablesDatabase {
 			tables.T12 = result.getInt("T12");
 
 
+
 			statement.close();
 			conn.close();
 
@@ -126,6 +133,7 @@ public class TablesDatabase {
 
 		return null;
 	}
+
 	
 	/**
 	 * connect to database and return the connection object for the database

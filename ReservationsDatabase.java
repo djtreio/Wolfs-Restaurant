@@ -69,6 +69,7 @@ public class ReservationsDatabase {
 			e.printStackTrace();
 		}
 	}
+
 	
 	//Updates and changes any data specfied in a booking
 	public static void setBooking(BookingInfo bookings) {
@@ -100,6 +101,7 @@ public class ReservationsDatabase {
 		}
 	}
 	//removes sepcified booking from database, based on id
+
 	public static void removeBooking(int itemid) {
 		try {
 			
@@ -120,8 +122,10 @@ public class ReservationsDatabase {
 				e.printStackTrace();
 			}
 	}
+
 	//Retrieves all bookings from database
 	public static BookingInfo[] getBookings() {
+
 		try {
 			
 			Connection conn = databaseConnect();
