@@ -41,7 +41,7 @@ public class ReservationsDatabase {
 			System.out.println(bookings[i].id + " " + bookings[i].size + " " + bookings[i].name + " "+ bookings[i].time);
 		}
 	}
-	
+	//Adds a booking to the Bookings table
 	public static void addBooking(BookingInfo bookings) {
 		try {
 			
@@ -70,7 +70,7 @@ public class ReservationsDatabase {
 		}
 	}
 	
-	
+	//Updates and changes any data specfied in a booking
 	public static void setBooking(BookingInfo bookings) {
 		try {
 			
@@ -99,7 +99,7 @@ public class ReservationsDatabase {
 			e.printStackTrace();
 		}
 	}
-	
+	//removes sepcified booking from database, based on id
 	public static void removeBooking(int itemid) {
 		try {
 			
@@ -120,6 +120,7 @@ public class ReservationsDatabase {
 				e.printStackTrace();
 			}
 	}
+	//Retrieves all bookings from database
 	public static BookingInfo[] getBookings() {
 		try {
 			
@@ -166,7 +167,7 @@ public class ReservationsDatabase {
 		
 		return null;
 	}
-	
+	//Retrieves specific booking from database
 	public static BookingInfo getBooking(int id) {
 		try {
 			
@@ -207,7 +208,7 @@ public class ReservationsDatabase {
 	}
 	
 	
-	
+	//COnnects to database
 	public static Connection databaseConnect() {
         try {
         	Class.forName("org.sqlite.JDBC");
