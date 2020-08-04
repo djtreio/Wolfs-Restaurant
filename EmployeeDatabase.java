@@ -1,11 +1,25 @@
+package CP317;
+
 
 import java.sql.*;
-import java.util.*;
-import java.util.Date;
-import java.text.*;
-import java.math.*;
+
+
+class EmployeeType {
+    public int id;
+    public String name;
+    public String role;
+    public String email;
+    public String position;
+    public String phone;
+}
+
 
 public class EmployeeDatabase {
+	
+	public static int empid;
+	public static EmployeeType employee;
+	public static String role;
+	public static String credentials;
 
     private static final String ConnectionString = "jdbc:sqlite:wolfs.sql";
 
@@ -13,9 +27,10 @@ public class EmployeeDatabase {
 
         EmployeeType newEmployee = new EmployeeType();
 
-        newEmployee.firstName = "Robert";
-        newEmployee.lastName = "Wolf";
+        newEmployee.name = "Robert Wolf";
         newEmployee.role = "Admin";
+        newEmployee.email = "RWolf@wolfs.ca";
+        newEmployee.phone = "905-844-2323";
         String newCredential = "regergerger";
         
         addEmployee(newEmployee, newCredential);
@@ -23,7 +38,7 @@ public class EmployeeDatabase {
         EmployeeType[] employees = getEmployees();
         
         for(int i = 0; i < employees.length; i++) {
-			System.out.println(employees[i].id + " " + employees[i].firstName + " " + employees[i].lastName + " " + employees[i].role);
+			System.out.println(employees[i].id + " " + employees[i].name + " " + employees[i].position + " " + employees[i].role);
 		}
 
     }
@@ -32,16 +47,16 @@ public class EmployeeDatabase {
         try {
             Connection conn = databaseConnect();
 
-            String sql = "INSERT INTO Employees (firstName, lastName, role) OUTPUT Inserted.id VALUES (?, ?, ?)";
+            String sql = "INSERT INTO Employees (name, role, email, position, phone) VALUES (?, ?, ?, ?, ?)";
 
             PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setString(1, employee.firstName);
-            statement.setString(2, employee.lastName);
-            statement.setString(3, employee.lastName);
+            statement.setString(1, employee.name);
+            statement.setString(2, employee.role);
+            statement.setString(3, employee.email);
+            statement.setString(4, employee.position);
+            statement.setString(5, employee.phone);
 
-            int id = statement.executeUpdate();
-
-            employee.id = id;
+            statement.executeUpdate();
 
             statement.close();
             conn.close();
@@ -76,9 +91,11 @@ public class EmployeeDatabase {
 
                 employees[i] = new EmployeeType();
                 employees[i].id = result.getInt("id");
-                employees[i].firstName = result.getString("firstName");
-                employees[i].lastName = result.getString("lastName");
+                employees[i].name = result.getString("name");
+                employees[i].position = result.getString("position");
                 employees[i].role = result.getString("role");
+                employees[i].email = result.getString("email");
+                employees[i].phone = result.getString("phone");
 
                 i++;
             }
@@ -105,17 +122,20 @@ public class EmployeeDatabase {
             PreparedStatement statement = conn.prepareStatement(sql);
             statement.setInt(1, id);
 
-            ResultSet result = statement.executeQuery(sql);
+            ResultSet result = statement.executeQuery();
 
-            statement.close();
-            conn.close();
 
             EmployeeType employee = new EmployeeType();
             employee.id = id;
-            employee.firstName = result.getString("firstName");
-            employee.lastName = result.getString("lastName");
+            employee.name = result.getString("name");
+            employee.position = result.getString("position");
             employee.role = result.getString("role");
+            employee.email = result.getString("email");
+            employee.phone = result.getString("phone");
 
+            statement.close();
+            conn.close();
+            
             return employee;
 
         } catch (Exception e) {
@@ -153,13 +173,15 @@ public class EmployeeDatabase {
         try {
             Connection conn = databaseConnect();
 
-            String sql = "UPDATE Employees SET firstName = ?, lastName = ?, role = ? WHERE id = ?";
+            String sql = "UPDATE Employees SET name = ?, position = ?, role = ?, email = ?, phone = ? WHERE id = ?";
 
             PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setString(1, employee.firstName);
-            statement.setString(2, employee.lastName);
+            statement.setString(1, employee.name);
+            statement.setString(2, employee.position);
             statement.setString(3, employee.role);
-            statement.setInt(4, employee.id);
+            statement.setString(4, employee.email);
+            statement.setString(5, employee.phone);
+            statement.setInt(6, employee.id);
 
             statement.executeUpdate();
 
@@ -178,7 +200,13 @@ public class EmployeeDatabase {
     }
 
     public static void editCredential(EmployeeType employee, String newCredential) {
-        CredentialDatabase.setCredential(employee, newCredential);
+    	if (credentials == "-1") {
+    		CredentialDatabase.addCredential(employee, newCredential);
+    	}
+    	else {
+    		CredentialDatabase.setCredential(employee, newCredential);
+    	}
+        
     }
 
     public static boolean comparePassword(EmployeeType employee, String enteredPassword) {

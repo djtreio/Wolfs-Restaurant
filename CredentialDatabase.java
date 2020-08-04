@@ -1,9 +1,8 @@
+package CP317;
+
 
 import java.sql.*;
-import java.util.*;
-import java.util.Date;
-import java.text.*;
-import java.math.*;
+
 
 public class CredentialDatabase {
 
@@ -18,11 +17,13 @@ public class CredentialDatabase {
             PreparedStatement statement = conn.prepareStatement(sql);
             statement.setInt(1, employee.id);
 
-            ResultSet result = statement.executeQuery(sql);
-
+            ResultSet result = statement.executeQuery();
+            String credential = result.getString(1);
+            
             statement.close();
             conn.close();
-            return result.getString(0);
+            
+            return credential;
         } catch (Exception e) {
             System.out.println("Error in getCredential");
             e.printStackTrace();
@@ -75,11 +76,12 @@ public class CredentialDatabase {
         try {
             Connection conn = databaseConnect();
 
-            String sql = "INSERT INTO Credentials (credential, employeeid) VALUES (?, ?)";
+            String sql = "INSERT INTO Credentials (employeeid, credentials) VALUES (?, ?)";
 
             PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setString(1, newCredential);
-            statement.setInt(2, employee.id);
+            statement.setInt(1, employee.id);
+            statement.setString(2, newCredential);
+            
 
             statement.executeUpdate();
 

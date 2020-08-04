@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
@@ -42,7 +43,7 @@ public class GUI {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					new GUI("");
+					new GUI("Login");
 					
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -89,6 +90,9 @@ public class GUI {
 			break;
 		case "Tables":
 			initializeT();
+			break;
+		case "Login":
+			initializeL();
 			break;
 		}
 		
@@ -243,7 +247,7 @@ public class GUI {
 	
 	
 	private JFrame ELframe;
-	private final JList ELlist = new JList();
+	private final JList<String> ELlist = new JList<String>();
 	private final JButton ELbtnAdd = new JButton("Add");
 	private final JButton ELbtnRemove = new JButton("Remove");
 	private final JButton ELbtnEdit = new JButton("Edit");
@@ -278,6 +282,44 @@ public class GUI {
 		ELframe.getContentPane().add(ELbtnOK);
 		ELbtnCancel.setBounds(124, 369, 89, 23);
 		
+		
+		EmployeeType[] employees = EmployeeDatabase.getEmployees();
+		String[] employeeList = new String[employees.length+1];
+		employeeList[0] = String.format("%-15s %-30s %-15s", "ID", "Name", "Position");
+		for (int i=0;i<employees.length;i++) {
+			employeeList[i+1] = String.format("%-15s %-30s %-15s", employees[i].id, employees[i].name, employees[i].position);
+		}
+		
+		ELlist.addListSelectionListener(new ListSelectionListener() {
+		    public void valueChanged(ListSelectionEvent event) {
+		        if (!event.getValueIsAdjusting()){
+		        	String temp = ELlist.getSelectedValue();
+		            EmployeeDatabase.empid = Integer.parseInt(temp.substring(0,temp.indexOf(" ")));
+		        }
+		    }
+		});
+		
+		ELlist.setListData(employeeList);
+		
+		
+		ELbtnAdd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				EmployeeDatabase.empid = -1;
+				EmployeeDatabase.employee = new EmployeeType();
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							ELframe.setVisible(false);
+							ELframe.dispose();
+							new GUI("EmployeeEdit");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		
 		ELbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ELframe.setVisible(false);
@@ -287,6 +329,9 @@ public class GUI {
 		
 		ELbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				EmployeeDatabase.employee = EmployeeDatabase.getEmployee(EmployeeDatabase.empid);
+				EmployeeDatabase.credentials = "-1";
+				EmployeeDatabase.credentials = EmployeeDatabase.getCredential(EmployeeDatabase.employee);
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -320,12 +365,10 @@ public class GUI {
 	private final JPanel Epanel2 = new JPanel();
 	private final JLabel ElblPhone = new JLabel("Phone");
 	private final JTextField EfldPhone = new JTextField();
-	private final JLabel ElblUser = new JLabel("Username");
+	private final JLabel ElblUser = new JLabel("UserID");
 	private final JTextField EfldUser = new JTextField();
 	private final JLabel ElblPos = new JLabel("Position");
 	private final JTextField EfldPos = new JTextField();
-	private final JLabel ElblStatus = new JLabel("Status");
-	private final JTextField EfldStatus = new JTextField();
 	private final JLabel ElblEmail = new JLabel("Email");
 	private final JTextField EfldEmail = new JTextField();
 	private final JLabel ElblType = new JLabel("Account Type");
@@ -334,6 +377,8 @@ public class GUI {
 	private final JPanel Epanel3 = new JPanel();
 	private final JButton EbtnCancel = new JButton("Cancel");
 	private final JButton EbtnOK = new JButton("OK");
+	private final JLabel ElblPassword = new JLabel("Password");
+	private final JTextField EfldPassword = new JTextField();
 	
 	
 	private void initializeE() {
@@ -409,21 +454,6 @@ public class GUI {
 		gbc_EfldPos.gridy = 8;
 		Epanel1.add(EfldPos, gbc_EfldPos);
 		
-		GridBagConstraints gbc_ElblStatus = new GridBagConstraints();
-		gbc_ElblStatus.anchor = GridBagConstraints.WEST;
-		gbc_ElblStatus.insets = new Insets(0, 0, 5, 0);
-		gbc_ElblStatus.gridx = 1;
-		gbc_ElblStatus.gridy = 10;
-		Epanel1.add(ElblStatus, gbc_ElblStatus);
-		EfldStatus.setColumns(10);
-		
-		GridBagConstraints gbc_EfldStatus = new GridBagConstraints();
-		gbc_EfldStatus.insets = new Insets(0, 0, 5, 0);
-		gbc_EfldStatus.fill = GridBagConstraints.HORIZONTAL;
-		gbc_EfldStatus.gridx = 1;
-		gbc_EfldStatus.gridy = 11;
-		Epanel1.add(EfldStatus, gbc_EfldStatus);
-		
 		GridBagConstraints gbc_Epanel2 = new GridBagConstraints();
 		gbc_Epanel2.fill = GridBagConstraints.BOTH;
 		gbc_Epanel2.gridx = 1;
@@ -478,6 +508,21 @@ public class GUI {
 		gbc_EfldType.gridy = 8;
 		Epanel2.add(EfldType, gbc_EfldType);
 		
+		GridBagConstraints gbc_ElblPassword = new GridBagConstraints();
+		gbc_ElblPassword.anchor = GridBagConstraints.WEST;
+		gbc_ElblPassword.insets = new Insets(0, 0, 5, 0);
+		gbc_ElblPassword.gridx = 1;
+		gbc_ElblPassword.gridy = 10;
+		Epanel1.add(ElblPassword, gbc_ElblPassword);
+		EfldPassword.setColumns(10);
+		
+		GridBagConstraints gbc_EfldPassword = new GridBagConstraints();
+		gbc_EfldPassword.insets = new Insets(0, 0, 5, 0);
+		gbc_EfldPassword.fill = GridBagConstraints.HORIZONTAL;
+		gbc_EfldPassword.gridx = 1;
+		gbc_EfldPassword.gridy = 11;
+		Epanel1.add(EfldPassword, gbc_EfldPassword);
+		
 		Eframe.getContentPane().add(Epanel4, BorderLayout.NORTH);
 		
 		Epanel4.add(ElblEmployee);
@@ -512,7 +557,17 @@ public class GUI {
 		gbc_EbtnCancel.gridy = 0;
 		Epanel3.add(EbtnCancel, gbc_EbtnCancel);
 		
-		Eframe.setVisible(true);
+		
+		EfldName.setText(EmployeeDatabase.employee.name);
+		EfldType.setText(EmployeeDatabase.employee.role);
+		EfldPos.setText(EmployeeDatabase.employee.position);
+		EfldEmail.setText(EmployeeDatabase.employee.email);
+		EfldPhone.setText(EmployeeDatabase.employee.phone);
+		EfldUser.setText(Integer.toString(EmployeeDatabase.employee.id));
+		EfldPassword.setText(EmployeeDatabase.credentials);
+		
+		
+		
 		
 		EbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -522,7 +577,32 @@ public class GUI {
 			}
 		});
 		
+		EbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				EmployeeType employee = new EmployeeType();
+				employee.id = EmployeeDatabase.empid;
+				employee.name = EfldName.getText();
+				employee.role = EfldType.getText();
+				employee.position = EfldPos.getText();
+				employee.email = EfldEmail.getText();
+				employee.phone = EfldPhone.getText();
+				
+				if (EmployeeDatabase.empid == -1) {
+					EmployeeDatabase.addEmployee(employee, EfldPassword.getText());
+				}
+				else {
+					EmployeeDatabase.setEmployee(employee);
+				}
+				EmployeeDatabase.editCredential(employee, EfldPassword.getText());
+				
+				Eframe.setVisible(false);
+				Eframe.dispose();
+				initializeEL();
+			}
+		});
 		
+		
+		Eframe.setVisible(true);
 	}
 	
 	private JFrame Oframe;
@@ -638,7 +718,7 @@ public class GUI {
 		OLframe.setBounds(100, 100, 786, 474);
 		OLframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		OLframe.getContentPane().setLayout(null);
-		OLlist.setBounds(417, 51, 325, 333);
+		OLlist.setBounds(339, 51, 403, 333);
 		
 		OLframe.getContentPane().add(OLlist);
 		OLbtnAdd.setBounds(167, 96, 89, 23);
@@ -671,9 +751,9 @@ public class GUI {
 		
 		ItemType[] items = OrderController.GetItems(OrderController.orderid);
 		String[] itemList = new String[items.length+1];
-		itemList[0] = String.format("%-15s %-15s %-15s %-15s %-15s", "ID", "Name", "Side", "Allergy", "Price");
+		itemList[0] = String.format("%-5s %-35s %-15s %-15s %-15s", "ID", "Name", "Side", "Allergy", "Price");
 		for (int i=0;i<items.length;i++) {
-			itemList[i+1] = String.format("%-15d %-15s %-15s %-15s %-15.2f", items[i].id, items[i].name, items[i].side, items[i].allergy, items[i].price-items[i].discount);
+			itemList[i+1] = String.format("%-5d %-35s %-15s %-15s %-15.2f", items[i].id, items[i].name, items[i].side, items[i].allergy, items[i].price-items[i].discount);
 		}
 		
 		OLlist.addListSelectionListener(new ListSelectionListener() {
@@ -1192,7 +1272,7 @@ public class GUI {
 	
 	
 	private JFrame RLframe;
-	private final JList RLlist = new JList();
+	private final JList<String> RLlist = new JList<String>();
 	private final JButton RLbtnAdd = new JButton("Add");
 	private final JButton RLbtnRemove = new JButton("Remove");
 	private final JButton RLbtnEdit = new JButton("Edit");
@@ -1229,7 +1309,35 @@ public class GUI {
 		RLframe.getContentPane().add(RLbtnCancel);
 		
 		
+		BookingInfo[] bookings = ReservationsDatabase.getBookings();
+		String[] itemList = new String[bookings.length+1];
+		itemList[0] = String.format("%-15s %-15s %-15s %-15s", "ID", "Name", "Date", "Time");
+		for (int i=0;i<bookings.length;i++) {
+			itemList[i+1] = String.format("%-15d %-15s %-15s %-15s", bookings[i].id, bookings[i].name, bookings[i].date, bookings[i].time);
+		}
+		
+		RLlist.addListSelectionListener(new ListSelectionListener() {
+		    public void valueChanged(ListSelectionEvent event) {
+		        if (!event.getValueIsAdjusting()){
+		        	String temp = RLlist.getSelectedValue();
+		            ReservationsDatabase.bookingid = Integer.parseInt(temp.substring(0,temp.indexOf(" ")));
+		        }
+		    }
+		});
+		
+		
+		RLlist.setListData(itemList);
+		
+		
 		RLbtnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				RLframe.setVisible(false);
+				RLframe.dispose();
+				initialize();
+			}
+		});
+		
+		RLbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				RLframe.setVisible(false);
 				RLframe.dispose();
@@ -1240,14 +1348,48 @@ public class GUI {
 		
 		RLbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				ReservationsDatabase.booking = ReservationsDatabase.getBooking(ReservationsDatabase.bookingid);
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
 							RLframe.setVisible(false);
 							RLframe.dispose();
 							new GUI("ReservationEdit");
-					
-							
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		
+		RLbtnAdd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ReservationsDatabase.booking = new BookingInfo();
+				ReservationsDatabase.bookingid = -1;
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							RLframe.setVisible(false);
+							RLframe.dispose();
+							new GUI("ReservationEdit");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		
+		RLbtnRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ReservationsDatabase.removeBooking(ReservationsDatabase.bookingid);
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							RLframe.setVisible(false);
+							RLframe.dispose();
+							new GUI("ReservationList");
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -1462,6 +1604,41 @@ public class GUI {
 		REpanel5.add(REbtnCancel, gbc_REbtnCancel);
 		
 		
+		REtxtName.setText(ReservationsDatabase.booking.name);
+		REtxtPeople.setText(Integer.toString(ReservationsDatabase.booking.size));
+		REtxtEmail.setText(ReservationsDatabase.booking.email);
+		REtxtPhone.setText(ReservationsDatabase.booking.phone);
+		REtxtNotes.setText(ReservationsDatabase.booking.notes);
+		REtxtDate.setText(ReservationsDatabase.booking.date);
+		REtxtTime.setText(ReservationsDatabase.booking.time);
+		
+		
+		REbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				ReservationsDatabase.booking.name = REtxtName.getText();
+				ReservationsDatabase.booking.notes = REtxtNotes.getText();
+				ReservationsDatabase.booking.email = REtxtEmail.getText();
+				ReservationsDatabase.booking.phone = REtxtPhone.getText();
+				ReservationsDatabase.booking.size = Integer.parseInt(REtxtPeople.getText());
+				ReservationsDatabase.booking.date = REtxtDate.getText();
+				ReservationsDatabase.booking.time = REtxtTime.getText();
+				
+				if (ReservationsDatabase.bookingid == -1) {	
+					ReservationsDatabase.addBooking(ReservationsDatabase.booking);
+				}
+				else {
+					ReservationsDatabase.setBooking(ReservationsDatabase.booking);
+				}
+				
+				
+				REframe.setVisible(false);
+				REframe.dispose();
+				initializeRL();
+			}
+		});
+		
+		
 		REbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				REframe.setVisible(false);
@@ -1495,69 +1672,74 @@ public class GUI {
 	private final JButton TbtnBusy = new JButton("Busy");
 	private final JButton TbtnOk = new JButton("OK");
 	private final JButton TbtnCancel = new JButton("Cancel");
+	private boolean busy_selected = false;
+	private boolean ready_selected = false;
+	private boolean dirty_selected = false;
 	
 	
 	private void initializeT() {
+		Color[] colors = new Color[] {Color.GREEN, Color.YELLOW, Color.RED};
+		TablesInfo tables = TablesDatabase.getTables();
 		Tframe = new JFrame();
 		Tframe.setBounds(100, 100, 764, 433);
 		Tframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Tframe.getContentPane().setLayout(null);
 		Ttgl1.setOpaque(true);
-		Ttgl1.setBackground(Color.RED);
+		Ttgl1.setBackground(colors[tables.T1]);
 		Ttgl1.setBounds(47, 88, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl1);
 		Ttgl2.setOpaque(true);
-		Ttgl2.setBackground(Color.RED);
+		Ttgl2.setBackground(colors[tables.T2]);
 		Ttgl2.setBounds(193, 88, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl2);
-		Ttgl3.setBackground(Color.GREEN);
+		Ttgl3.setBackground(colors[tables.T3]);
 		Ttgl3.setOpaque(true);
 		Ttgl3.setBounds(341, 88, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl3);
-		Ttgl4.setBackground(Color.GREEN);
+		Ttgl4.setBackground(colors[tables.T4]);
 		Ttgl4.setOpaque(true);
 		Ttgl4.setBounds(47, 149, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl4);
-		Ttgl5.setBackground(Color.YELLOW);
+		Ttgl5.setBackground(colors[tables.T5]);
 		Ttgl5.setOpaque(true);
 		Ttgl5.setBounds(193, 149, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl5);
-		Ttgl6.setBackground(Color.RED);
+		Ttgl6.setBackground(colors[tables.T6]);
 		Ttgl6.setOpaque(true);
 		Ttgl6.setBounds(341, 149, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl6);
-		Ttgl7.setBackground(Color.GREEN);
+		Ttgl7.setBackground(colors[tables.T7]);
 		Ttgl7.setOpaque(true);
 		Ttgl7.setBounds(47, 209, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl7);
-		Ttgl8.setBackground(Color.GREEN);
+		Ttgl8.setBackground(colors[tables.T8]);
 		Ttgl8.setOpaque(true);
 		Ttgl8.setBounds(193, 209, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl8);
-		Ttgl9.setBackground(Color.GREEN);
+		Ttgl9.setBackground(colors[tables.T9]);
 		Ttgl9.setOpaque(true);
 		Ttgl9.setBounds(341, 209, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl9);
-		Ttgl10.setBackground(Color.RED);
+		Ttgl10.setBackground(colors[tables.T10]);
 		Ttgl10.setOpaque(true);
 		Ttgl10.setBounds(47, 271, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl10);
-		Ttgl11.setBackground(Color.YELLOW);
+		Ttgl11.setBackground(colors[tables.T11]);
 		Ttgl11.setOpaque(true);
 		Ttgl11.setBounds(193, 271, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl11);
-		Ttgl12.setBackground(Color.YELLOW);
+		Ttgl12.setBackground(colors[tables.T12]);
 		Ttgl12.setOpaque(true);
 		Ttgl12.setBounds(341, 271, 123, 40);
 		
@@ -1586,6 +1768,207 @@ public class GUI {
 		Tframe.getContentPane().add(TbtnCancel);
 		
 		
+		TbtnReady.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				busy_selected = false;
+				ready_selected = true;
+				dirty_selected = false;
+			}
+		});
+
+		TbtnBusy.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				busy_selected = true;
+				ready_selected = false;
+				dirty_selected = false;
+			}
+		});
+
+		TbtnDirty.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				busy_selected = false;
+				ready_selected = false;
+				dirty_selected = true;
+			}
+		});
+
+		Ttgl1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl1.setBackground(Color.RED);
+					tables.T1 = 2;
+				} else if (ready_selected) {
+					Ttgl1.setBackground(Color.GREEN);
+					tables.T1 = 0;
+				} else if (dirty_selected) {
+					Ttgl1.setBackground(Color.YELLOW);
+					tables.T1 = 1;
+				}
+			}
+		});
+		Ttgl2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl2.setBackground(Color.RED);
+					tables.T2 = 2;
+				} else if (ready_selected) {
+					Ttgl2.setBackground(Color.GREEN);
+					tables.T2 = 0;
+				} else if (dirty_selected) {
+					Ttgl2.setBackground(Color.YELLOW);
+					tables.T2 = 1;
+				}
+			}
+		});
+		Ttgl3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl3.setBackground(Color.RED);
+					tables.T3 = 2;
+				} else if (ready_selected) {
+					Ttgl3.setBackground(Color.GREEN);
+					tables.T3 = 0;
+				} else if (dirty_selected) {
+					Ttgl3.setBackground(Color.YELLOW);
+					tables.T3 = 1;
+				}
+			}
+		});
+		Ttgl4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl4.setBackground(Color.RED);
+					tables.T4 = 2;
+				} else if (ready_selected) {
+					Ttgl4.setBackground(Color.GREEN);
+					tables.T4 = 0;
+				} else if (dirty_selected) {
+					Ttgl4.setBackground(Color.YELLOW);
+					tables.T4 = 1;
+				}
+			}
+		});
+		Ttgl5.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl5.setBackground(Color.RED);
+					tables.T5 = 2;
+				} else if (ready_selected) {
+					Ttgl5.setBackground(Color.GREEN);
+					tables.T5 = 0;
+				} else if (dirty_selected) {
+					Ttgl5.setBackground(Color.YELLOW);
+					tables.T5 = 1;
+				}
+			}
+		});
+		Ttgl6.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl6.setBackground(Color.RED);
+					tables.T6 = 2;
+				} else if (ready_selected) {
+					Ttgl6.setBackground(Color.GREEN);
+					tables.T6 = 0;
+				} else if (dirty_selected) {
+					Ttgl6.setBackground(Color.YELLOW);
+					tables.T6 = 1;
+				}
+			}
+		});
+		Ttgl7.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl7.setBackground(Color.RED);
+					tables.T7 = 2;
+				} else if (ready_selected) {
+					Ttgl7.setBackground(Color.GREEN);
+					tables.T7 = 0;
+				} else if (dirty_selected) {
+					Ttgl7.setBackground(Color.YELLOW);
+					tables.T7 = 1;
+				}
+			}
+		});
+		Ttgl8.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl8.setBackground(Color.RED);
+					tables.T8 = 2;
+				} else if (ready_selected) {
+					Ttgl8.setBackground(Color.GREEN);
+					tables.T8 = 0;
+				} else if (dirty_selected) {
+					Ttgl8.setBackground(Color.YELLOW);
+					tables.T8 = 1;
+				}
+			}
+		});
+		Ttgl9.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl9.setBackground(Color.RED);
+					tables.T9 = 2;
+				} else if (ready_selected) {
+					Ttgl9.setBackground(Color.GREEN);
+					tables.T9 = 0;
+				} else if (dirty_selected) {
+					Ttgl9.setBackground(Color.YELLOW);
+					tables.T9 = 1;
+				}
+			}
+		});
+		Ttgl10.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl10.setBackground(Color.RED);
+					tables.T10 = 2;
+				} else if (ready_selected) {
+					Ttgl10.setBackground(Color.GREEN);
+					tables.T10 = 0;
+				} else if (dirty_selected) {
+					Ttgl10.setBackground(Color.YELLOW);
+					tables.T10 = 1;
+				}
+			}
+		});
+		Ttgl11.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl11.setBackground(Color.RED);
+					tables.T11 = 2;
+				} else if (ready_selected) {
+					Ttgl11.setBackground(Color.GREEN);
+					tables.T11 = 0;
+				} else if (dirty_selected) {
+					Ttgl11.setBackground(Color.YELLOW);
+					tables.T11 = 1;
+				}
+			}
+		});
+		Ttgl12.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl12.setBackground(Color.RED);
+					tables.T12 = 2;
+				} else if (ready_selected) {
+					Ttgl12.setBackground(Color.GREEN);
+					tables.T12 = 0;
+				} else if (dirty_selected) {
+					Ttgl12.setBackground(Color.YELLOW);
+					tables.T12 = 1;
+				}
+			}
+		});
+
+		TbtnOk.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				TablesDatabase.addTables(tables);
+				Tframe.setVisible(false);
+				Tframe.dispose();
+				initialize();
+			}
+		});
 		TbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Tframe.setVisible(false);
@@ -1596,6 +1979,69 @@ public class GUI {
 		
 		
 		Tframe.setVisible(true);
+	}
+	
+	private JFrame Lframe;
+	private final JLabel LlblLogin = new JLabel("Login");
+	private final JLabel LlblUser = new JLabel("User ID");
+	private final JTextField LtxtUser = new JTextField();
+	private final JLabel LlblPassword = new JLabel("Password");
+	private final JTextField LtxtPassword = new JPasswordField();
+	private final JButton LbtnOK = new JButton("OK");
+	
+	
+	private void initializeL() {
+		LtxtUser.setBounds(124, 110, 178, 20);
+		LtxtUser.setColumns(10);
+		Lframe = new JFrame();
+		Lframe.setBounds(100, 100, 450, 300);
+		Lframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		Lframe.getContentPane().setLayout(null);
+		LlblLogin.setHorizontalAlignment(SwingConstants.CENTER);
+		LlblLogin.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		LlblLogin.setBounds(34, 45, 355, 39);
+		
+		Lframe.getContentPane().add(LlblLogin);
+		LlblUser.setBounds(124, 95, 63, 14);
+		
+		Lframe.getContentPane().add(LlblUser);
+		
+		Lframe.getContentPane().add(LtxtUser);
+		LlblPassword.setBounds(124, 141, 126, 14);
+		
+		Lframe.getContentPane().add(LlblPassword);
+		LtxtPassword.setBounds(124, 155, 178, 20);
+		
+		Lframe.getContentPane().add(LtxtPassword);
+		LbtnOK.setBounds(320, 216, 89, 23);
+		
+		Lframe.getContentPane().add(LbtnOK);
+		
+		LbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				EmployeeType employee = EmployeeDatabase.getEmployee(Integer.parseInt(LtxtUser.getText()));
+				if (EmployeeDatabase.comparePassword(employee,LtxtPassword.getText())){
+					EventQueue.invokeLater(new Runnable() {
+						public void run() {
+							try {
+								Lframe.setVisible(false);
+								Lframe.dispose();
+								new GUI("");
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
+				}
+				else {
+					LlblLogin.setText("Incorrect Login: Try Again");
+				}
+				
+			}
+		});
+		
+		
+		Lframe.setVisible(true);
 	}
 	
 }

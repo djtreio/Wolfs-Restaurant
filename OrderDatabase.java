@@ -344,7 +344,7 @@ public class OrderDatabase {
         return null;
     }
 	
-	
+	/**
 	private static void testOrders() {
 		OrderType order = new OrderType();
 
@@ -375,8 +375,9 @@ public class OrderDatabase {
 			System.out.println(orders[i].id + " " + orders[i].price + " " + orders[i].discount + " " + orders[i].finalPrice);
 		}
 	}
+	**/
 	
-	
+	/**
 	private static void testItems() {
 		ItemType item = new ItemType();
 		
@@ -427,5 +428,5 @@ public class OrderDatabase {
 		}
 	}
 	
-
+**/
 }

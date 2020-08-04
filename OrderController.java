@@ -34,6 +34,15 @@ public class OrderController {
 	}
 	
 	public static void SetItem(ItemType item) {
+		String name = item.name;
+		MenuType menu = MenuDatabase.getMenuItem(name);
+		if (menu.price == 0) {
+			item.price = 18;
+		}
+		else {
+			item.price = menu.price;
+		}
+		
 		if (item.id == -1) {
 			OrderDatabase.addItem(item);
 		}

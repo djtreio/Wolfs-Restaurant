@@ -1,10 +1,7 @@
 package CP317;
 
 import java.sql.*;
-import java.util.*;
-import java.util.Date;
-import java.text.*;
-import java.math.*;
+
 
 
 public class MenuDatabase {
@@ -92,6 +89,43 @@ public class MenuDatabase {
 			
 			if (menuItem.id == 0) {
 				System.out.println("No menu item found with name " + Integer.toString(id));
+			}
+			
+			statement.close();
+			conn.close();
+			return menuItem;
+			
+		}
+		catch(Exception e) {
+			System.out.println("Error in getMenuItem");
+			e.printStackTrace();
+			return menuItem;
+		}
+	}
+	
+	
+	public static MenuType getMenuItem(String name) {
+		MenuType menuItem = new MenuType("Null","","n",0,0);
+
+		try {
+			Connection conn = databaseConnect();
+	
+			String sql = "SELECT * FROM Menu WHERE name = ?";
+			PreparedStatement statement = conn.prepareStatement(sql);
+			statement.setString(1, name);
+			
+			ResultSet result = statement.executeQuery();
+			
+			menuItem.id = result.getInt("id");
+			menuItem.name = result.getString("name");
+			menuItem.category = result.getString("category");
+			menuItem.price = result.getFloat("price");
+			menuItem.status = result.getString("status");
+			menuItem.cost = result.getFloat("cost");
+
+			
+			if (menuItem.id == 0) {
+				System.out.println("No menu item found with name " + name);
 			}
 			
 			statement.close();
