@@ -333,13 +333,27 @@ public class GUI {
 				initialize();
 			}
 		});
+		//OK Button - closes current window and opens previous window
+		ELbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ELframe.setVisible(false);
+				ELframe.dispose();
+				initialize();
+			}
+		});
+		
 		//Edit Button - sets employee variable in EmployeeDatabase, gets credentials, and then closes current window and opens EmployeeEdit
 		//credentials set to -1 is in case employee doesn't currently have credentials
 		ELbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				EmployeeDatabase.employee = EmployeeDatabase.getEmployee(EmployeeDatabase.empid);
 				EmployeeDatabase.credentials = "-1";
 				EmployeeDatabase.credentials = EmployeeDatabase.getCredential(EmployeeDatabase.employee);
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -357,8 +371,13 @@ public class GUI {
 		//Remove Button - removes selected employee from database and reloads window
 		ELbtnRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				EmployeeDatabase.employee = EmployeeDatabase.getEmployee(EmployeeDatabase.empid);
 				EmployeeDatabase.removeEmployee(EmployeeDatabase.employee);
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -607,6 +626,7 @@ public class GUI {
 		//OK Button - create employee object with properties from text fields and add or set in database. then close current window and open previous
 		EbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				EmployeeType employee = new EmployeeType();
 				employee.id = EmployeeDatabase.empid;
 				employee.name = EfldName.getText();
@@ -623,12 +643,16 @@ public class GUI {
 					EmployeeDatabase.setEmployee(employee);
 				}
 				EmployeeDatabase.editCredential(employee, EfldPassword.getText());
-				
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				Eframe.setVisible(false);
 				Eframe.dispose();
 				initializeEL();
 			}
 		});
+		
 		
 		
 		Eframe.setVisible(true);
@@ -687,7 +711,12 @@ public class GUI {
 		//OK Button - sets order in OrderController to order with orderid then closes current window and opens OrderList window
 		ObtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				OrderController.order = OrderController.GetOrder(OrderController.orderid);
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -712,7 +741,12 @@ public class GUI {
 		//New Order Button - create new empty order to store it in database, then reload current window
 		ObtnNewOrder.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				OrderController.CreateOrder();
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -806,12 +840,17 @@ public class GUI {
 		//OK Button - Applies the current discount value to the opened Order, closes current window, and opens previous window
 		OLbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+			try {
 				OrderController.order.discount = Float.parseFloat(OLtxtDiscount.getText());
 				OrderController.SetOrder(OrderController.order);
 				
 				OLframe.setVisible(false);
 				OLframe.dispose();
 				initializeO();
+			}
+			catch (Exception f) {
+				f.printStackTrace();
+			}
 			}
 		});
 		
@@ -826,7 +865,12 @@ public class GUI {
 		//Edit Button - sets the item object in OrderController for storage and opens the OrderEdit window
 		OLbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+			try {
 				OrderController.item = OrderController.GetItem(OrderController.orderid,OrderController.itemid);
+			}
+			catch (Exception f) {
+				f.printStackTrace();
+			}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -843,8 +887,13 @@ public class GUI {
 		//Add Button - resets the item object in OrderController and sets item id to -1 to be recognized as new item, then opens OrderEdit Window
 		OLbtnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+			try {
 				OrderController.item = new ItemType();
 				OrderController.itemid = -1;
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -861,7 +910,12 @@ public class GUI {
 		//Remove Button - removes selected item from order then refreshes the list to update values
 		OLbtnRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				OrderController.RemoveItem(OrderController.orderid, OrderController.itemid);
+			}
+			catch (Exception f) {
+				f.printStackTrace();
+			}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -1061,6 +1115,7 @@ public class GUI {
 		//sets the current item to the new attributes entered in the text fields then closes current window and opens the previous one
 		OIbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+			try {
 				ItemType item = new ItemType();
 				item.id = OrderController.itemid;
 				item.orderid = OrderController.orderid;
@@ -1071,7 +1126,10 @@ public class GUI {
 				item.notes = OItxtNotes.getText();
 				
 				OrderController.SetItem(item);
-				
+			}
+			catch (Exception f) {
+				f.printStackTrace();
+			}
 				OIframe.setVisible(false);
 				OIframe.dispose();
 				initializeOL();
@@ -1159,7 +1217,12 @@ public class GUI {
 		//Remove Button - removes menu item and refreshes list
 		MLbtnRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				MenuController.removefromMenu(MenuController.menu);
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -1192,7 +1255,12 @@ public class GUI {
 		//Edit Button - Close current window and open MenuItem window while retaining stored values in MenuController
 		MLbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				System.out.print(MenuController.menu.id);
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -1209,8 +1277,13 @@ public class GUI {
 		//Add Button - Reset stored data in MenuController and close current window and open MenuItem window 
 		MLbtnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				MenuController.menuid = -1;
 				MenuController.menu = new MenuType("","","y",0,0);
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -1294,12 +1367,16 @@ public class GUI {
 		//OK Button - Sets MenuController menu to new  values in text field then sets the menu properties in the database. Closes current window and opens previous
 		MIbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				MenuController.menu.name = MItxtName.getText();
 				MenuController.menu.category = MItxtCategory.getText();
 				MenuController.menu.price = Float.parseFloat(MItxtPrice.getText());
 				
 				MenuController.setMenuItem(MenuController.menu);
-				
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				MIframe.setVisible(false);
 				MIframe.dispose();
 				initializeML();
@@ -1387,7 +1464,12 @@ public class GUI {
 		//Edit Button - gets reservation with bookingid and stores in ReservationsDatabase. closes current window and opens ReservationEdit window
 		RLbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				ReservationsDatabase.booking = ReservationsDatabase.getBooking(ReservationsDatabase.bookingid);
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -1404,8 +1486,13 @@ public class GUI {
 		//Add Button - clears booking in ReservationDatabase and sets bookingid to -1. closes current window and opens ReservationEdit window
 		RLbtnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				ReservationsDatabase.booking = new BookingInfo();
 				ReservationsDatabase.bookingid = -1;
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -1422,7 +1509,12 @@ public class GUI {
 		//Remove Button - removes the selected booking from the reservation data. refreshes the window to update list
 		RLbtnRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
 				ReservationsDatabase.removeBooking(ReservationsDatabase.bookingid);
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -1655,7 +1747,7 @@ public class GUI {
 		//OK Button - set booking object with new properties in text boxes, then adds or sets object in database
 		REbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				try {
 				ReservationsDatabase.booking.name = REtxtName.getText();
 				ReservationsDatabase.booking.notes = REtxtNotes.getText();
 				ReservationsDatabase.booking.email = REtxtEmail.getText();
@@ -1670,7 +1762,10 @@ public class GUI {
 				else {
 					ReservationsDatabase.setBooking(ReservationsDatabase.booking);
 				}
-				
+				}
+				catch (Exception f) {
+					f.printStackTrace();
+				}
 				
 				REframe.setVisible(false);
 				REframe.dispose();
