@@ -24,9 +24,7 @@ import javax.swing.event.ListSelectionListener;
 
 public class GUI {
 	
-	int orderid = 0;
-	OrderType order;
-
+	//initialize variables for hub
 	private JFrame frame;
 	private final JPanel panel = new JPanel();
 	private final JButton btnOrders = new JButton("Orders");
@@ -37,7 +35,7 @@ public class GUI {
 	private final JLabel lblNewLabel = new JLabel("The Hub");
 
 	/**
-	 * Launch the application.
+	 * Launch the application starting with login
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -55,6 +53,8 @@ public class GUI {
 
 	/**
 	 * Create the application.
+	 * Different initialize functions for different windows.
+	 * Gets passed a string indicating which initialize to execute
 	 */
 	public GUI(String type) {
 		switch(type) {
@@ -100,8 +100,10 @@ public class GUI {
 
 	/**
 	 * Initialize the contents of the frame.
+	 * Initializes hub window
 	 */
 	private void initialize() {
+		//creates frames, panels and buttons and sets properties
 		frame = new JFrame();
 		frame.setBounds(100, 100, 737, 412);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -154,6 +156,8 @@ public class GUI {
 		panel.add(btnEmployees, gbc_btnOrders);
 		
 		frame.setVisible(true);
+		
+		//Employee Button - Launches the Employee window
 		btnEmployees.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -171,7 +175,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Order Button - Launches the Orders window
 		btnOrders.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -189,7 +193,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Menu Button - Launches the MenuList window
 		btnMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -207,7 +211,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Reservations Button - Launches Reservations window
 		btnReservations.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -225,7 +229,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Tables Button - Launches Tables window
 		btnTables.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -245,7 +249,7 @@ public class GUI {
 		});
 	}
 	
-	
+	//initialize variables for EmployeeList window
 	private JFrame ELframe;
 	private final JList<String> ELlist = new JList<String>();
 	private final JButton ELbtnAdd = new JButton("Add");
@@ -255,8 +259,9 @@ public class GUI {
 	private final JButton ELbtnOK = new JButton("OK");
 	private final JButton ELbtnCancel = new JButton("Cancel");
 	
+	//initialize EmployeeList window
 	private void initializeEL() {
-		
+		//creates and sets properties of frame, buttons, and list
 		ELframe = new JFrame();
 		ELframe.setBounds(100, 100, 786, 474);
 		ELframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -282,7 +287,7 @@ public class GUI {
 		ELframe.getContentPane().add(ELbtnOK);
 		ELbtnCancel.setBounds(124, 369, 89, 23);
 		
-		
+		//gets employee list from database and converts each entry to a string
 		EmployeeType[] employees = EmployeeDatabase.getEmployees();
 		String[] employeeList = new String[employees.length+1];
 		employeeList[0] = String.format("%-15s %-30s %-15s", "ID", "Name", "Position");
@@ -290,6 +295,7 @@ public class GUI {
 			employeeList[i+1] = String.format("%-15s %-30s %-15s", employees[i].id, employees[i].name, employees[i].position);
 		}
 		
+		//Selection listener tracks the item selected in the list and stores the employee id in EmployeeDatabase
 		ELlist.addListSelectionListener(new ListSelectionListener() {
 		    public void valueChanged(ListSelectionEvent event) {
 		        if (!event.getValueIsAdjusting()){
@@ -301,7 +307,7 @@ public class GUI {
 		
 		ELlist.setListData(employeeList);
 		
-		
+		//Add Button - sets empid to -1 and clears employee variable then closes current window and opens EmployeeEdit window
 		ELbtnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EmployeeDatabase.empid = -1;
@@ -319,14 +325,16 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Cancel Button - closes current window and opens previous window
 		ELbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ELframe.setVisible(false);
+				ELframe.dispose();
 				initialize();
 			}
 		});
-		
+		//Edit Button - sets employee variable in EmployeeDatabase, gets credentials, and then closes current window and opens EmployeeEdit
+		//credentials set to -1 is in case employee doesn't currently have credentials
 		ELbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EmployeeDatabase.employee = EmployeeDatabase.getEmployee(EmployeeDatabase.empid);
@@ -346,6 +354,25 @@ public class GUI {
 			}
 		});
 		
+		//Remove Button - removes selected employee from database and reloads window
+		ELbtnRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				EmployeeDatabase.employee = EmployeeDatabase.getEmployee(EmployeeDatabase.empid);
+				EmployeeDatabase.removeEmployee(EmployeeDatabase.employee);
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							ELframe.setVisible(false);
+							ELframe.dispose();
+							new GUI("Employee");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		
 		ELframe.getContentPane().add(ELbtnCancel);
 		
 		ELframe.setVisible(true);
@@ -354,7 +381,7 @@ public class GUI {
 	
 
 	
-	
+	//Initialize variables for EmployeeEdit window
 	private JFrame Eframe;
 	private final JPanel Epanel = new JPanel();
 	private final JPanel Epanel1 = new JPanel();
@@ -380,8 +407,9 @@ public class GUI {
 	private final JLabel ElblPassword = new JLabel("Password");
 	private final JTextField EfldPassword = new JTextField();
 	
-	
+	//initialize EmployeeEdit window
 	private void initializeE() {
+		//create and set properties of frame, panels, labels, buttons, and text fields
 		EfldType.setColumns(10);
 		EfldEmail.setColumns(10);
 		EfldUser.setColumns(10);
@@ -557,7 +585,7 @@ public class GUI {
 		gbc_EbtnCancel.gridy = 0;
 		Epanel3.add(EbtnCancel, gbc_EbtnCancel);
 		
-		
+		//populate text fields with properties of stored employee in EmployeeDatabase
 		EfldName.setText(EmployeeDatabase.employee.name);
 		EfldType.setText(EmployeeDatabase.employee.role);
 		EfldPos.setText(EmployeeDatabase.employee.position);
@@ -568,7 +596,7 @@ public class GUI {
 		
 		
 		
-		
+		//Cancel Button - closes currrent window and initializes previous window
 		EbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Eframe.setVisible(false);
@@ -576,7 +604,7 @@ public class GUI {
 				initializeEL();
 			}
 		});
-		
+		//OK Button - create employee object with properties from text fields and add or set in database. then close current window and open previous
 		EbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EmployeeType employee = new EmployeeType();
@@ -587,6 +615,7 @@ public class GUI {
 				employee.email = EfldEmail.getText();
 				employee.phone = EfldPhone.getText();
 				
+				//if empid == -1, then the add button was pressed, telling EmployeeDatabase to insert instead of update
 				if (EmployeeDatabase.empid == -1) {
 					EmployeeDatabase.addEmployee(employee, EfldPassword.getText());
 				}
@@ -605,6 +634,7 @@ public class GUI {
 		Eframe.setVisible(true);
 	}
 	
+	//initialize Order variables
 	private JFrame Oframe;
 	private final JList<String> Olist = new JList<String>();
 	private final JLabel OlblOrders = new JLabel("Orders");
@@ -612,21 +642,23 @@ public class GUI {
 	private final JButton ObtnCancel = new JButton("Cancel");
 	private final JButton ObtnNewOrder = new JButton("New Order");
 	
-	
+	//initialize orders window
 	private void initializeO() {
+		//create and set properties of frame and list
 		Oframe = new JFrame();
 		Oframe.setBounds(100, 100, 786, 474);
 		Oframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Oframe.getContentPane().setLayout(null);
 		Olist.setBounds(322, 51, 420, 333);
 		
+		//get all orders from database and convert them to string to load into the Jlist
 		OrderType[] orders = OrderController.GetOrders();
 		String[] orderList = new String[orders.length+1];
 		orderList[0] = String.format("%-15s %10s", "Order ID", "Price");
 		for (int i=0;i<orders.length;i++) {
 			orderList[i+1] = String.format("%-15d %15.2f", orders[i].id, orders[i].finalPrice);
 		}
-		
+		//Selection listener tracks currently selected order and stores the orderid in OrderController
 		Olist.addListSelectionListener(new ListSelectionListener() {
 		    public void valueChanged(ListSelectionEvent event) {
 		        if (!event.getValueIsAdjusting()){
@@ -637,7 +669,7 @@ public class GUI {
 		});
 		
 		Olist.setListData(orderList);
-		
+		//create and set properties of buttons
 		Oframe.getContentPane().add(Olist);
 		OlblOrders.setBounds(360, 11, 48, 14);
 		
@@ -652,7 +684,7 @@ public class GUI {
 		
 		Oframe.getContentPane().add(ObtnNewOrder);
 		
-		
+		//OK Button - sets order in OrderController to order with orderid then closes current window and opens OrderList window
 		ObtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OrderController.order = OrderController.GetOrder(OrderController.orderid);
@@ -669,7 +701,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Cancel Button - closes current window and opens previous window
 		ObtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Oframe.setVisible(false);
@@ -677,7 +709,7 @@ public class GUI {
 				initialize();
 			}
 		});
-		
+		//New Order Button - create new empty order to store it in database, then reload current window
 		ObtnNewOrder.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OrderController.CreateOrder();
@@ -698,7 +730,7 @@ public class GUI {
 		Oframe.setVisible(true);
 	}
 	
-	
+	//To declare variables for OrderList Gui Frame
 	private JFrame OLframe;
 	private final JList<String> OLlist = new JList<String>();
 	private final JButton OLbtnAdd = new JButton("Add");
@@ -710,8 +742,9 @@ public class GUI {
 	private final JTextField OLtxtDiscount = new JTextField();
 	private final JLabel OLlblDiscount = new JLabel("Discount");
 	
-	
+	//To initialize the OrderList GUI Frame
 	private void initializeOL() {
+		//Create buttons, labels, and list and set properties.
 		OLtxtDiscount.setBounds(211, 287, 96, 20);
 		OLtxtDiscount.setColumns(10);
 		OLframe = new JFrame();
@@ -749,6 +782,7 @@ public class GUI {
 		
 		OLtxtDiscount.setText(Float.toString(OrderController.order.discount));
 		
+		//Gets the list of items from the database and converts them to a string to be printed in the JList
 		ItemType[] items = OrderController.GetItems(OrderController.orderid);
 		String[] itemList = new String[items.length+1];
 		itemList[0] = String.format("%-5s %-35s %-15s %-15s %-15s", "ID", "Name", "Side", "Allergy", "Price");
@@ -756,6 +790,7 @@ public class GUI {
 			itemList[i+1] = String.format("%-5d %-35s %-15s %-15s %-15.2f", items[i].id, items[i].name, items[i].side, items[i].allergy, items[i].price-items[i].discount);
 		}
 		
+		//List selection listener to get the currently selected item and store it's id in the OrderController class variable
 		OLlist.addListSelectionListener(new ListSelectionListener() {
 		    public void valueChanged(ListSelectionEvent event) {
 		        if (!event.getValueIsAdjusting()){
@@ -765,10 +800,10 @@ public class GUI {
 		    }
 		});
 		
-		
+		//Puts the String Array created earlier in the JList
 		OLlist.setListData(itemList);
 		
-		
+		//OK Button - Applies the current discount value to the opened Order, closes current window, and opens previous window
 		OLbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OrderController.order.discount = Float.parseFloat(OLtxtDiscount.getText());
@@ -780,7 +815,7 @@ public class GUI {
 			}
 		});
 		
-		
+		//Cancel Button - closes current window and opens previous window without changing anything
 		OLbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OLframe.setVisible(false);
@@ -788,7 +823,7 @@ public class GUI {
 				initializeO();
 			}
 		});
-		
+		//Edit Button - sets the item object in OrderController for storage and opens the OrderEdit window
 		OLbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OrderController.item = OrderController.GetItem(OrderController.orderid,OrderController.itemid);
@@ -805,7 +840,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Add Button - resets the item object in OrderController and sets item id to -1 to be recognized as new item, then opens OrderEdit Window
 		OLbtnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OrderController.item = new ItemType();
@@ -823,7 +858,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Remove Button - removes selected item from order then refreshes the list to update values
 		OLbtnRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OrderController.RemoveItem(OrderController.orderid, OrderController.itemid);
@@ -845,7 +880,7 @@ public class GUI {
 		
 		OLframe.setVisible(true);
 	}
-	
+	//Initialize variables for OrderItem frame
 	private JFrame OIframe;
 	private final JPanel OIpanel = new JPanel();
 	private final JPanel OIpanel1 = new JPanel();
@@ -867,8 +902,9 @@ public class GUI {
 	private final JButton OIbtnCancel = new JButton("Cancel");
 	private final JButton OIbtnOK = new JButton("OK");
 	
-	
+	//initializes the OrderItem frame
 	private void initializeOI() {
+		//creates and sets the properties of buttons, panels, and labels
 		OItxtNotes.setColumns(10);
 		OItxtAllergy.setColumns(10);
 		OItxtSide.setColumns(10);
@@ -1014,6 +1050,7 @@ public class GUI {
 		gbc_OIbtnCancel.gridy = 0;
 		OIpanel5.add(OIbtnCancel, gbc_OIbtnCancel);
 		
+		//closes the current window and opens the previous window
 		OIbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OIframe.setVisible(false);
@@ -1021,7 +1058,7 @@ public class GUI {
 				initializeOL();
 			}
 		});
-		
+		//sets the current item to the new attributes entered in the text fields then closes current window and opens the previous one
 		OIbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ItemType item = new ItemType();
@@ -1041,7 +1078,7 @@ public class GUI {
 			}
 		});
 		
-		
+		//populate the text fields with the currently looked at item
 		OItxtItem.setText(OrderController.item.name);
 		OItxtSide.setText(OrderController.item.side);
 		OItxtAllergy.setText(OrderController.item.allergy);
@@ -1053,7 +1090,7 @@ public class GUI {
 		OIframe.setVisible(true);
 	}
 	
-	
+	//initialize variables for MenuList window
 	private JFrame MLframe;
 	private final JList<String> MLlist = new JList<String>();
 	private final JButton MLbtnAdd = new JButton("Add");
@@ -1063,8 +1100,9 @@ public class GUI {
 	private final JButton MLbtnOK = new JButton("OK");
 	private final JButton MLbtnCancel = new JButton("Cancel");
 	
-	
+	//initialize menu list
 	private void initializeML() {
+		//create and set properties of buttons and list
 		MLframe = new JFrame();
 		MLframe.setBounds(100, 100, 786, 474);
 		MLframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -1093,14 +1131,14 @@ public class GUI {
 		
 		
 		
-		
+		//get list of menu items and convert to string to be put in JList
 		MenuType[] items = MenuController.getMenu();
 		String[] itemList = new String[items.length+1];
 		itemList[0] = String.format("%-15s %-15s %-15s %-15s", "ID", "Name", "Category", "Price");
 		for (int i=0;i<items.length;i++) {
 			itemList[i+1] = String.format("%-15d %-15s %-15s %-15.2f", items[i].id, items[i].name, items[i].category, items[i].price);
 		}
-		
+		//List Selection Listener to get currently selected menu id, get the menu item from menu list and store the menu item in MenuController
 		MLlist.addListSelectionListener(new ListSelectionListener() {
 		    public void valueChanged(ListSelectionEvent event) {
 		        if (!event.getValueIsAdjusting()){
@@ -1118,7 +1156,7 @@ public class GUI {
 		
 		MLlist.setListData(itemList);
 		
-		
+		//Remove Button - removes menu item and refreshes list
 		MLbtnRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MenuController.removefromMenu(MenuController.menu);
@@ -1135,7 +1173,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Cancel Button - Close current window and open previous window
 		MLbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MLframe.setVisible(false);
@@ -1143,7 +1181,7 @@ public class GUI {
 				initialize();
 			}
 		});
-		
+		//OK Button - Close current window and open previous window
 		MLbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MLframe.setVisible(false);
@@ -1151,7 +1189,7 @@ public class GUI {
 				initialize();
 			}
 		});
-		
+		//Edit Button - Close current window and open MenuItem window while retaining stored values in MenuController
 		MLbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.print(MenuController.menu.id);
@@ -1168,7 +1206,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Add Button - Reset stored data in MenuController and close current window and open MenuItem window 
 		MLbtnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MenuController.menuid = -1;
@@ -1190,7 +1228,7 @@ public class GUI {
 		MLframe.setVisible(true);
 	}
 	
-	
+	//Initialize variables for MenuItems frame
 	private JFrame MIframe;
 	private final JLabel MIlblMenuItem = new JLabel("Menu Item");
 	private final JLabel MIlblName = new JLabel("Name");
@@ -1202,8 +1240,9 @@ public class GUI {
 	private final JLabel MIlblCategory = new JLabel("Category");
 	private final JTextField MItxtCategory = new JTextField();
 	
-	
+	//Initialize MenuItem window
 	private void initializeMI() {
+		//create and set property of MenuItem variables
 		MItxtPrice.setBounds(23, 145, 96, 20);
 		MItxtPrice.setColumns(10);
 		MItxtName.setBounds(23, 89, 96, 20);
@@ -1240,11 +1279,11 @@ public class GUI {
 		
 		MIframe.getContentPane().add(MItxtCategory);
 		
-		
+		//load the properties from MenuController MenuItem into text fields
 		MItxtName.setText(MenuController.menu.name);
 		MItxtCategory.setText(MenuController.menu.category);
 		MItxtPrice.setText(Float.toString(MenuController.menu.price));
-		
+		//Cancel Button - closes current window and opens previous window
 		MIbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MIframe.setVisible(false);
@@ -1252,7 +1291,7 @@ public class GUI {
 				initializeML();
 			}
 		});
-		
+		//OK Button - Sets MenuController menu to new  values in text field then sets the menu properties in the database. Closes current window and opens previous
 		MIbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MenuController.menu.name = MItxtName.getText();
@@ -1270,7 +1309,7 @@ public class GUI {
 		MIframe.setVisible(true);
 	}
 	
-	
+	//Initialize ReservationList variables
 	private JFrame RLframe;
 	private final JList<String> RLlist = new JList<String>();
 	private final JButton RLbtnAdd = new JButton("Add");
@@ -1280,7 +1319,7 @@ public class GUI {
 	private final JButton RLbtnOK = new JButton("OK");
 	private final JButton RLbtnCancel = new JButton("Cancel");
 	
-	
+	//initializes ReservationList window
 	private void initializeRL() {
 		RLframe = new JFrame();
 		RLframe.setBounds(100, 100, 786, 474);
@@ -1308,14 +1347,14 @@ public class GUI {
 		
 		RLframe.getContentPane().add(RLbtnCancel);
 		
-		
+		//get list of bookings from database and convert to string to be displayed in list
 		BookingInfo[] bookings = ReservationsDatabase.getBookings();
 		String[] itemList = new String[bookings.length+1];
 		itemList[0] = String.format("%-15s %-15s %-15s %-15s", "ID", "Name", "Date", "Time");
 		for (int i=0;i<bookings.length;i++) {
 			itemList[i+1] = String.format("%-15d %-15s %-15s %-15s", bookings[i].id, bookings[i].name, bookings[i].date, bookings[i].time);
 		}
-		
+		//Selection Listener tracks current selected item and stores the booking id in ReservationsDatabase for later
 		RLlist.addListSelectionListener(new ListSelectionListener() {
 		    public void valueChanged(ListSelectionEvent event) {
 		        if (!event.getValueIsAdjusting()){
@@ -1328,7 +1367,7 @@ public class GUI {
 		
 		RLlist.setListData(itemList);
 		
-		
+		//Cancel Button - closes current window and opens previous window
 		RLbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				RLframe.setVisible(false);
@@ -1336,7 +1375,7 @@ public class GUI {
 				initialize();
 			}
 		});
-		
+		//OK Button - closes current window and opens previous window
 		RLbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				RLframe.setVisible(false);
@@ -1345,7 +1384,7 @@ public class GUI {
 			}
 		});
 		
-		
+		//Edit Button - gets reservation with bookingid and stores in ReservationsDatabase. closes current window and opens ReservationEdit window
 		RLbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ReservationsDatabase.booking = ReservationsDatabase.getBooking(ReservationsDatabase.bookingid);
@@ -1362,7 +1401,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Add Button - clears booking in ReservationDatabase and sets bookingid to -1. closes current window and opens ReservationEdit window
 		RLbtnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ReservationsDatabase.booking = new BookingInfo();
@@ -1380,7 +1419,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Remove Button - removes the selected booking from the reservation data. refreshes the window to update list
 		RLbtnRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ReservationsDatabase.removeBooking(ReservationsDatabase.bookingid);
@@ -1401,7 +1440,7 @@ public class GUI {
 		RLframe.setVisible(true);
 	}
 	
-	
+	//initializes variables for ReservationsEdit frame
 	private JFrame REframe;
 	private final JPanel REpanel = new JPanel();
 	private final JPanel REpanel1 = new JPanel();
@@ -1427,8 +1466,9 @@ public class GUI {
 	private final JButton REbtnCancel = new JButton("Cancel");
 	private final JButton REbtnOK = new JButton("OK");
 	
-	
+	//initializes ReservationEdit window
 	private void initializeRE() {
+		//creates and sets properties of panels, labels, buttons, and text fields
 		REtxtNotes.setColumns(10);
 		REtxtTime.setColumns(10);
 		REtxtPeople.setColumns(10);
@@ -1603,7 +1643,7 @@ public class GUI {
 		gbc_REbtnCancel.gridy = 0;
 		REpanel5.add(REbtnCancel, gbc_REbtnCancel);
 		
-		
+		//populates text fields with selected Booking in ReservationsDatabase
 		REtxtName.setText(ReservationsDatabase.booking.name);
 		REtxtPeople.setText(Integer.toString(ReservationsDatabase.booking.size));
 		REtxtEmail.setText(ReservationsDatabase.booking.email);
@@ -1612,7 +1652,7 @@ public class GUI {
 		REtxtDate.setText(ReservationsDatabase.booking.date);
 		REtxtTime.setText(ReservationsDatabase.booking.time);
 		
-		
+		//OK Button - set booking object with new properties in text boxes, then adds or sets object in database
 		REbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
@@ -1623,7 +1663,7 @@ public class GUI {
 				ReservationsDatabase.booking.size = Integer.parseInt(REtxtPeople.getText());
 				ReservationsDatabase.booking.date = REtxtDate.getText();
 				ReservationsDatabase.booking.time = REtxtTime.getText();
-				
+				//if bookingid == -1, the add button was pressed so it is inserted instead of updated
 				if (ReservationsDatabase.bookingid == -1) {	
 					ReservationsDatabase.addBooking(ReservationsDatabase.booking);
 				}
@@ -1638,7 +1678,7 @@ public class GUI {
 			}
 		});
 		
-		
+		//Cancel Button - close current window and open previous window
 		REbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				REframe.setVisible(false);
@@ -1652,7 +1692,7 @@ public class GUI {
 		REframe.setVisible(true);
 	}
 	
-	
+	//initializes variables for Table buttons
 	private JFrame Tframe;
 	private final JToggleButton Ttgl1 = new JToggleButton("1");
 	private final JToggleButton Ttgl2 = new JToggleButton("2");
@@ -1676,10 +1716,12 @@ public class GUI {
 	private boolean ready_selected = false;
 	private boolean dirty_selected = false;
 	
-	
+	//initializes Tables window
 	private void initializeT() {
+		//get data from database and assign integers to a color
 		Color[] colors = new Color[] {Color.GREEN, Color.YELLOW, Color.RED};
 		TablesInfo tables = TablesDatabase.getTables();
+		//create and set properties of buttons
 		Tframe = new JFrame();
 		Tframe.setBounds(100, 100, 764, 433);
 		Tframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -1767,7 +1809,7 @@ public class GUI {
 		
 		Tframe.getContentPane().add(TbtnCancel);
 		
-		
+		//set ready to true to change color to green
 		TbtnReady.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				busy_selected = false;
@@ -1775,7 +1817,7 @@ public class GUI {
 				dirty_selected = false;
 			}
 		});
-
+		//set busy to true to set color to red
 		TbtnBusy.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				busy_selected = true;
@@ -1783,7 +1825,7 @@ public class GUI {
 				dirty_selected = false;
 			}
 		});
-
+		//set dirty to true to set color to yellow
 		TbtnDirty.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				busy_selected = false;
@@ -1791,7 +1833,7 @@ public class GUI {
 				dirty_selected = true;
 			}
 		});
-
+		//listeners for all buttons that changes the color to selected color
 		Ttgl1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (busy_selected) {
@@ -1980,7 +2022,7 @@ public class GUI {
 		
 		Tframe.setVisible(true);
 	}
-	
+	//initializes variables for Login window
 	private JFrame Lframe;
 	private final JLabel LlblLogin = new JLabel("Login");
 	private final JLabel LlblUser = new JLabel("User ID");
@@ -1989,8 +2031,9 @@ public class GUI {
 	private final JTextField LtxtPassword = new JPasswordField();
 	private final JButton LbtnOK = new JButton("OK");
 	
-	
+	//initializes Login window
 	private void initializeL() {
+		//create and set properties of buttons and labels
 		LtxtUser.setBounds(124, 110, 178, 20);
 		LtxtUser.setColumns(10);
 		Lframe = new JFrame();
@@ -2017,6 +2060,7 @@ public class GUI {
 		
 		Lframe.getContentPane().add(LbtnOK);
 		
+		//OK Button - compares password field to stored password to validate login
 		LbtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EmployeeType employee = EmployeeDatabase.getEmployee(Integer.parseInt(LtxtUser.getText()));
@@ -2034,6 +2078,7 @@ public class GUI {
 					});
 				}
 				else {
+					//if incorrect, notify user
 					LlblLogin.setText("Incorrect Login: Try Again");
 				}
 				

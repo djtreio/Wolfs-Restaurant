@@ -1,14 +1,14 @@
 package CP317;
 import java.sql.*;
 
-
+//Class for storing orders
 class OrderType{
 	public int id;
 	public float price = 0;
 	public float discount = 0;
 	public float finalPrice = 0;
 }
-
+//Class for storing items
 class ItemType{
 	public int id;
 	public int orderid;
@@ -22,8 +22,11 @@ class ItemType{
 }
 
 public class OrderDatabase {
+	
+	//database used for orders
 	private static final String ConnectionString = "jdbc:sqlite:wolfs.sql";
-
+	
+	//main function for testing
 	public static void main(String[] args) {
 		//testOrders();
 		
@@ -37,6 +40,10 @@ public class OrderDatabase {
 		
 	}
 	
+	/**
+	 * add order to database with properties of order
+	 * @param order - ordertype with properties to set to database
+	 */
 	public static void addOrder(OrderType order) {
 		try {
 			
@@ -60,6 +67,10 @@ public class OrderDatabase {
 		}
 	}
 	
+	/**
+	 * add item to database with properties of item
+	 * @param item - itemtype with properties to set to database
+	 */
 	public static void addItem(ItemType item) {
 		try {
 			
@@ -87,6 +98,10 @@ public class OrderDatabase {
 		}
 	}
 	
+	/**
+	 * get all orders from database
+	 * takes results from SQL statement and stores in OrderType list
+	 */
 	public static OrderType[] getOrders() {
 		try {
 			
@@ -128,6 +143,11 @@ public class OrderDatabase {
 		return null;
 	}
 	
+	/**
+	 * get all items from database matching orderid
+	 * takes results from SQL statement and stores in ItemType list
+	 * @param orderid - orderid of order to get all items from
+	 */
 	public static ItemType[] getItems(int orderid) {
 		try {
 			
@@ -178,7 +198,11 @@ public class OrderDatabase {
 		return null;
 	}
 	
-	
+	/**
+	 * get order from database matching orderid
+	 * takes results from SQL statement and stores in OrderType object
+	 * @param orderid - orderid of selected order
+	 */
 	public static OrderType getOrder(int orderid) {
 		try {
 			Connection conn = databaseConnect();
@@ -211,6 +235,12 @@ public class OrderDatabase {
 		return null;
 	}
 	
+	/**
+	 * get item from database matching orderid and itemid
+	 * takes results from SQL statement and stores in ItemType object
+	 * @param orderid - orderid of selected order
+	 * @param itemid - itemid of selected order
+	 */
 	public static ItemType getItem(int orderid, int itemid) {
 		try {
 			
@@ -251,7 +281,10 @@ public class OrderDatabase {
 		return null;
 	}
 	
-	
+	/**
+	 * set order in database to new properties of order
+	 * @param order - OrderType object with new properties to be put in database
+	 */
 	public static void setOrder(OrderType order) {
 		try {
 			
@@ -276,6 +309,10 @@ public class OrderDatabase {
 		}
 	}
 	
+	/**
+	 * set item in database to new properties of item
+	 * @param item - ItemType object with new properties to be put in database
+	 */
 	public static void setItem(ItemType item) {
 		try {
 			
@@ -303,6 +340,11 @@ public class OrderDatabase {
 		}
 	}
 	
+	/**
+	 * remove item from database matching orderid and itemid
+	 * @param orderid - orderid of selected order
+	 * @param itemid - itemid of selected order
+	 */
 	public static void removeItem(int orderid, int itemid) {
 		try {
 			
@@ -326,7 +368,9 @@ public class OrderDatabase {
 	}
 	
 	
-	
+	/**
+	 * connect to database and return the connection object for the database
+	 */
 	public static Connection databaseConnect() {
         try {
         	Class.forName("org.sqlite.JDBC");
