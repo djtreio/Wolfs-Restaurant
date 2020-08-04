@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+//Class for storing table states
 class TablesInfo {
 	public int T1;
 	public int T2;
@@ -23,9 +24,12 @@ class TablesInfo {
 }
 
 public class TablesDatabase {
+	//database used for tables
 	private static final String ConnectionString = "jdbc:sqlite:wolfs.sql";
-
+	
+	//main testing function
 	public static void main(String[] args) {
+		//Set all tables to ready
 		TablesInfo tables = new TablesInfo();
 		tables.T1 = 0;
 		tables.T2 = 0;
@@ -40,14 +44,20 @@ public class TablesDatabase {
 		tables.T11 = 0;
 		tables.T12 = 0;
 		
+		//add table states to db
 		addTables(tables);
 	}
-
+	
+	/**
+	 * add current table states to database
+	 * @param tables - TablesInfo with properties to set to database
+	 */
 	public static void addTables(TablesInfo tables) {
 		try {
-
+			//db connection
 			Connection conn = databaseConnect();
-
+			
+			//SQL update table update code
 			String sql = "UPDATE Tables SET T1 = ?, T2 = ?, T3 = ?, T4 = ?, T5 = ?, T6 = ?, T7 = ?, T8 = ?, T9 = ?, T10 = ?, T11 = ?, T12 = ? WHERE id = 0";
 
 			PreparedStatement statement = conn.prepareStatement(sql);
@@ -73,7 +83,12 @@ public class TablesDatabase {
 			e.printStackTrace();
 		}
 	}
-
+	
+	/**
+	 * get all table states from database
+	 * takes results from SQL statement and stores in TablesInfo list
+	 */
+	
 	public static TablesInfo getTables() {
 		try {
 
@@ -113,7 +128,10 @@ public class TablesDatabase {
 
 		return null;
 	}
-
+	
+	/**
+	 * connect to database and return the connection object for the database
+	 */
 	public static Connection databaseConnect() {
 		try {
 			Class.forName("org.sqlite.JDBC");
