@@ -9,20 +9,22 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public class GUI {
-
+	
+	//initialize variables for hub
 	private JFrame frame;
 	private final JPanel panel = new JPanel();
 	private final JButton btnOrders = new JButton("Orders");
@@ -33,13 +35,13 @@ public class GUI {
 	private final JLabel lblNewLabel = new JLabel("The Hub");
 
 	/**
-	 * Launch the application.
+	 * Launch the application starting with login
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					new GUI("");
+					new GUI("Login");
 					
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -51,6 +53,8 @@ public class GUI {
 
 	/**
 	 * Create the application.
+	 * Different initialize functions for different windows.
+	 * Gets passed a string indicating which initialize to execute
 	 */
 	public GUI(String type) {
 		switch(type) {
@@ -87,14 +91,19 @@ public class GUI {
 		case "Tables":
 			initializeT();
 			break;
+		case "Login":
+			initializeL();
+			break;
 		}
 		
 	}
 
 	/**
 	 * Initialize the contents of the frame.
+	 * Initializes hub window
 	 */
 	private void initialize() {
+		//creates frames, panels and buttons and sets properties
 		frame = new JFrame();
 		frame.setBounds(100, 100, 737, 412);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -147,6 +156,8 @@ public class GUI {
 		panel.add(btnEmployees, gbc_btnOrders);
 		
 		frame.setVisible(true);
+		
+		//Employee Button - Launches the Employee window
 		btnEmployees.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -164,7 +175,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Order Button - Launches the Orders window
 		btnOrders.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -182,7 +193,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Menu Button - Launches the MenuList window
 		btnMenu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -200,7 +211,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Reservations Button - Launches Reservations window
 		btnReservations.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -218,7 +229,7 @@ public class GUI {
 				});
 			}
 		});
-		
+		//Tables Button - Launches Tables window
 		btnTables.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -238,9 +249,9 @@ public class GUI {
 		});
 	}
 	
-	
+	//initialize variables for EmployeeList window
 	private JFrame ELframe;
-	private final JList ELlist = new JList();
+	private final JList<String> ELlist = new JList<String>();
 	private final JButton ELbtnAdd = new JButton("Add");
 	private final JButton ELbtnRemove = new JButton("Remove");
 	private final JButton ELbtnEdit = new JButton("Edit");
@@ -248,8 +259,9 @@ public class GUI {
 	private final JButton ELbtnOK = new JButton("OK");
 	private final JButton ELbtnCancel = new JButton("Cancel");
 	
+	//initialize EmployeeList window
 	private void initializeEL() {
-		
+		//creates and sets properties of frame, buttons, and list
 		ELframe = new JFrame();
 		ELframe.setBounds(100, 100, 786, 474);
 		ELframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -275,21 +287,84 @@ public class GUI {
 		ELframe.getContentPane().add(ELbtnOK);
 		ELbtnCancel.setBounds(124, 369, 89, 23);
 		
-		ELbtnCancel.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ELframe.setVisible(false);
-				initialize();
-			}
+		//gets employee list from database and converts each entry to a string
+		EmployeeType[] employees = EmployeeDatabase.getEmployees();
+		String[] employeeList = new String[employees.length+1];
+		employeeList[0] = String.format("%-15s %-30s %-15s", "ID", "Name", "Position");
+		for (int i=0;i<employees.length;i++) {
+			employeeList[i+1] = String.format("%-15s %-30s %-15s", employees[i].id, employees[i].name, employees[i].position);
+		}
+		
+		//Selection listener tracks the item selected in the list and stores the employee id in EmployeeDatabase
+		ELlist.addListSelectionListener(new ListSelectionListener() {
+		    public void valueChanged(ListSelectionEvent event) {
+		        if (!event.getValueIsAdjusting()){
+		        	String temp = ELlist.getSelectedValue();
+		            EmployeeDatabase.empid = Integer.parseInt(temp.substring(0,temp.indexOf(" ")));
+		        }
+		    }
 		});
 		
-		ELbtnEdit.addActionListener(new ActionListener() {
+		ELlist.setListData(employeeList);
+		
+		//Add Button - sets empid to -1 and clears employee variable then closes current window and opens EmployeeEdit window
+		ELbtnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				EmployeeDatabase.empid = -1;
+				EmployeeDatabase.employee = new EmployeeType();
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
 							ELframe.setVisible(false);
 							ELframe.dispose();
 							new GUI("EmployeeEdit");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		//Cancel Button - closes current window and opens previous window
+		ELbtnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ELframe.setVisible(false);
+				ELframe.dispose();
+				initialize();
+			}
+		});
+		//Edit Button - sets employee variable in EmployeeDatabase, gets credentials, and then closes current window and opens EmployeeEdit
+		//credentials set to -1 is in case employee doesn't currently have credentials
+		ELbtnEdit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				EmployeeDatabase.employee = EmployeeDatabase.getEmployee(EmployeeDatabase.empid);
+				EmployeeDatabase.credentials = "-1";
+				EmployeeDatabase.credentials = EmployeeDatabase.getCredential(EmployeeDatabase.employee);
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							ELframe.setVisible(false);
+							ELframe.dispose();
+							new GUI("EmployeeEdit");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		
+		//Remove Button - removes selected employee from database and reloads window
+		ELbtnRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				EmployeeDatabase.employee = EmployeeDatabase.getEmployee(EmployeeDatabase.empid);
+				EmployeeDatabase.removeEmployee(EmployeeDatabase.employee);
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							ELframe.setVisible(false);
+							ELframe.dispose();
+							new GUI("Employee");
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -306,7 +381,7 @@ public class GUI {
 	
 
 	
-	
+	//Initialize variables for EmployeeEdit window
 	private JFrame Eframe;
 	private final JPanel Epanel = new JPanel();
 	private final JPanel Epanel1 = new JPanel();
@@ -317,12 +392,10 @@ public class GUI {
 	private final JPanel Epanel2 = new JPanel();
 	private final JLabel ElblPhone = new JLabel("Phone");
 	private final JTextField EfldPhone = new JTextField();
-	private final JLabel ElblUser = new JLabel("Username");
+	private final JLabel ElblUser = new JLabel("UserID");
 	private final JTextField EfldUser = new JTextField();
 	private final JLabel ElblPos = new JLabel("Position");
 	private final JTextField EfldPos = new JTextField();
-	private final JLabel ElblStatus = new JLabel("Status");
-	private final JTextField EfldStatus = new JTextField();
 	private final JLabel ElblEmail = new JLabel("Email");
 	private final JTextField EfldEmail = new JTextField();
 	private final JLabel ElblType = new JLabel("Account Type");
@@ -331,9 +404,12 @@ public class GUI {
 	private final JPanel Epanel3 = new JPanel();
 	private final JButton EbtnCancel = new JButton("Cancel");
 	private final JButton EbtnOK = new JButton("OK");
+	private final JLabel ElblPassword = new JLabel("Password");
+	private final JTextField EfldPassword = new JTextField();
 	
-	
+	//initialize EmployeeEdit window
 	private void initializeE() {
+		//create and set properties of frame, panels, labels, buttons, and text fields
 		EfldType.setColumns(10);
 		EfldEmail.setColumns(10);
 		EfldUser.setColumns(10);
@@ -406,21 +482,6 @@ public class GUI {
 		gbc_EfldPos.gridy = 8;
 		Epanel1.add(EfldPos, gbc_EfldPos);
 		
-		GridBagConstraints gbc_ElblStatus = new GridBagConstraints();
-		gbc_ElblStatus.anchor = GridBagConstraints.WEST;
-		gbc_ElblStatus.insets = new Insets(0, 0, 5, 0);
-		gbc_ElblStatus.gridx = 1;
-		gbc_ElblStatus.gridy = 10;
-		Epanel1.add(ElblStatus, gbc_ElblStatus);
-		EfldStatus.setColumns(10);
-		
-		GridBagConstraints gbc_EfldStatus = new GridBagConstraints();
-		gbc_EfldStatus.insets = new Insets(0, 0, 5, 0);
-		gbc_EfldStatus.fill = GridBagConstraints.HORIZONTAL;
-		gbc_EfldStatus.gridx = 1;
-		gbc_EfldStatus.gridy = 11;
-		Epanel1.add(EfldStatus, gbc_EfldStatus);
-		
 		GridBagConstraints gbc_Epanel2 = new GridBagConstraints();
 		gbc_Epanel2.fill = GridBagConstraints.BOTH;
 		gbc_Epanel2.gridx = 1;
@@ -475,6 +536,21 @@ public class GUI {
 		gbc_EfldType.gridy = 8;
 		Epanel2.add(EfldType, gbc_EfldType);
 		
+		GridBagConstraints gbc_ElblPassword = new GridBagConstraints();
+		gbc_ElblPassword.anchor = GridBagConstraints.WEST;
+		gbc_ElblPassword.insets = new Insets(0, 0, 5, 0);
+		gbc_ElblPassword.gridx = 1;
+		gbc_ElblPassword.gridy = 10;
+		Epanel1.add(ElblPassword, gbc_ElblPassword);
+		EfldPassword.setColumns(10);
+		
+		GridBagConstraints gbc_EfldPassword = new GridBagConstraints();
+		gbc_EfldPassword.insets = new Insets(0, 0, 5, 0);
+		gbc_EfldPassword.fill = GridBagConstraints.HORIZONTAL;
+		gbc_EfldPassword.gridx = 1;
+		gbc_EfldPassword.gridy = 11;
+		Epanel1.add(EfldPassword, gbc_EfldPassword);
+		
 		Eframe.getContentPane().add(Epanel4, BorderLayout.NORTH);
 		
 		Epanel4.add(ElblEmployee);
@@ -509,8 +585,18 @@ public class GUI {
 		gbc_EbtnCancel.gridy = 0;
 		Epanel3.add(EbtnCancel, gbc_EbtnCancel);
 		
-		Eframe.setVisible(true);
+		//populate text fields with properties of stored employee in EmployeeDatabase
+		EfldName.setText(EmployeeDatabase.employee.name);
+		EfldType.setText(EmployeeDatabase.employee.role);
+		EfldPos.setText(EmployeeDatabase.employee.position);
+		EfldEmail.setText(EmployeeDatabase.employee.email);
+		EfldPhone.setText(EmployeeDatabase.employee.phone);
+		EfldUser.setText(Integer.toString(EmployeeDatabase.employee.id));
+		EfldPassword.setText(EmployeeDatabase.credentials);
 		
+		
+		
+		//Cancel Button - closes currrent window and initializes previous window
 		EbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Eframe.setVisible(false);
@@ -518,25 +604,72 @@ public class GUI {
 				initializeEL();
 			}
 		});
+		//OK Button - create employee object with properties from text fields and add or set in database. then close current window and open previous
+		EbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				EmployeeType employee = new EmployeeType();
+				employee.id = EmployeeDatabase.empid;
+				employee.name = EfldName.getText();
+				employee.role = EfldType.getText();
+				employee.position = EfldPos.getText();
+				employee.email = EfldEmail.getText();
+				employee.phone = EfldPhone.getText();
+				
+				//if empid == -1, then the add button was pressed, telling EmployeeDatabase to insert instead of update
+				if (EmployeeDatabase.empid == -1) {
+					EmployeeDatabase.addEmployee(employee, EfldPassword.getText());
+				}
+				else {
+					EmployeeDatabase.setEmployee(employee);
+				}
+				EmployeeDatabase.editCredential(employee, EfldPassword.getText());
+				
+				Eframe.setVisible(false);
+				Eframe.dispose();
+				initializeEL();
+			}
+		});
 		
 		
+		Eframe.setVisible(true);
 	}
 	
+	//initialize Order variables
 	private JFrame Oframe;
-	private final JList Olist = new JList();
+	private final JList<String> Olist = new JList<String>();
 	private final JLabel OlblOrders = new JLabel("Orders");
 	private final JButton ObtnOK = new JButton("OK");
 	private final JButton ObtnCancel = new JButton("Cancel");
 	private final JButton ObtnNewOrder = new JButton("New Order");
 	
-	
+	//initialize orders window
 	private void initializeO() {
+		//create and set properties of frame and list
 		Oframe = new JFrame();
 		Oframe.setBounds(100, 100, 786, 474);
 		Oframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Oframe.getContentPane().setLayout(null);
 		Olist.setBounds(322, 51, 420, 333);
 		
+		//get all orders from database and convert them to string to load into the Jlist
+		OrderType[] orders = OrderController.GetOrders();
+		String[] orderList = new String[orders.length+1];
+		orderList[0] = String.format("%-15s %10s", "Order ID", "Price");
+		for (int i=0;i<orders.length;i++) {
+			orderList[i+1] = String.format("%-15d %15.2f", orders[i].id, orders[i].finalPrice);
+		}
+		//Selection listener tracks currently selected order and stores the orderid in OrderController
+		Olist.addListSelectionListener(new ListSelectionListener() {
+		    public void valueChanged(ListSelectionEvent event) {
+		        if (!event.getValueIsAdjusting()){
+		        	String temp = Olist.getSelectedValue();
+		            OrderController.orderid = Integer.parseInt(temp.substring(0,temp.indexOf(" ")));
+		        }
+		    }
+		});
+		
+		Olist.setListData(orderList);
+		//create and set properties of buttons
 		Oframe.getContentPane().add(Olist);
 		OlblOrders.setBounds(360, 11, 48, 14);
 		
@@ -551,17 +684,10 @@ public class GUI {
 		
 		Oframe.getContentPane().add(ObtnNewOrder);
 		
-		
-		ObtnCancel.addActionListener(new ActionListener() {
+		//OK Button - sets order in OrderController to order with orderid then closes current window and opens OrderList window
+		ObtnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Oframe.setVisible(false);
-				Oframe.dispose();
-				initialize();
-			}
-		});
-		
-		ObtnNewOrder.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+				OrderController.order = OrderController.GetOrder(OrderController.orderid);
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -575,13 +701,38 @@ public class GUI {
 				});
 			}
 		});
+		//Cancel Button - closes current window and opens previous window
+		ObtnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Oframe.setVisible(false);
+				Oframe.dispose();
+				initialize();
+			}
+		});
+		//New Order Button - create new empty order to store it in database, then reload current window
+		ObtnNewOrder.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OrderController.CreateOrder();
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							Oframe.setVisible(false);
+							Oframe.dispose();
+							new GUI("Orders");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
 		
 		Oframe.setVisible(true);
 	}
 	
-	
+	//To declare variables for OrderList Gui Frame
 	private JFrame OLframe;
-	private final JList OLlist = new JList();
+	private final JList<String> OLlist = new JList<String>();
 	private final JButton OLbtnAdd = new JButton("Add");
 	private final JButton OLbtnRemove = new JButton("Remove");
 	private final JButton OLbtnEdit = new JButton("Edit");
@@ -591,15 +742,16 @@ public class GUI {
 	private final JTextField OLtxtDiscount = new JTextField();
 	private final JLabel OLlblDiscount = new JLabel("Discount");
 	
-	
+	//To initialize the OrderList GUI Frame
 	private void initializeOL() {
+		//Create buttons, labels, and list and set properties.
 		OLtxtDiscount.setBounds(211, 287, 96, 20);
 		OLtxtDiscount.setColumns(10);
 		OLframe = new JFrame();
 		OLframe.setBounds(100, 100, 786, 474);
 		OLframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		OLframe.getContentPane().setLayout(null);
-		OLlist.setBounds(417, 51, 325, 333);
+		OLlist.setBounds(339, 51, 403, 333);
 		
 		OLframe.getContentPane().add(OLlist);
 		OLbtnAdd.setBounds(167, 96, 89, 23);
@@ -628,6 +780,42 @@ public class GUI {
 		OLframe.getContentPane().add(OLlblDiscount);
 		
 		
+		OLtxtDiscount.setText(Float.toString(OrderController.order.discount));
+		
+		//Gets the list of items from the database and converts them to a string to be printed in the JList
+		ItemType[] items = OrderController.GetItems(OrderController.orderid);
+		String[] itemList = new String[items.length+1];
+		itemList[0] = String.format("%-5s %-35s %-15s %-15s %-15s", "ID", "Name", "Side", "Allergy", "Price");
+		for (int i=0;i<items.length;i++) {
+			itemList[i+1] = String.format("%-5d %-35s %-15s %-15s %-15.2f", items[i].id, items[i].name, items[i].side, items[i].allergy, items[i].price-items[i].discount);
+		}
+		
+		//List selection listener to get the currently selected item and store it's id in the OrderController class variable
+		OLlist.addListSelectionListener(new ListSelectionListener() {
+		    public void valueChanged(ListSelectionEvent event) {
+		        if (!event.getValueIsAdjusting()){
+		        	String temp = OLlist.getSelectedValue();
+		            OrderController.itemid = Integer.parseInt(temp.substring(0,temp.indexOf(" ")));
+		        }
+		    }
+		});
+		
+		//Puts the String Array created earlier in the JList
+		OLlist.setListData(itemList);
+		
+		//OK Button - Applies the current discount value to the opened Order, closes current window, and opens previous window
+		OLbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OrderController.order.discount = Float.parseFloat(OLtxtDiscount.getText());
+				OrderController.SetOrder(OrderController.order);
+				
+				OLframe.setVisible(false);
+				OLframe.dispose();
+				initializeO();
+			}
+		});
+		
+		//Cancel Button - closes current window and opens previous window without changing anything
 		OLbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OLframe.setVisible(false);
@@ -635,9 +823,10 @@ public class GUI {
 				initializeO();
 			}
 		});
-		
+		//Edit Button - sets the item object in OrderController for storage and opens the OrderEdit window
 		OLbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				OrderController.item = OrderController.GetItem(OrderController.orderid,OrderController.itemid);
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -651,11 +840,47 @@ public class GUI {
 				});
 			}
 		});
+		//Add Button - resets the item object in OrderController and sets item id to -1 to be recognized as new item, then opens OrderEdit Window
+		OLbtnAdd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OrderController.item = new ItemType();
+				OrderController.itemid = -1;
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							OLframe.setVisible(false);
+							OLframe.dispose();
+							new GUI("OrderItem");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		//Remove Button - removes selected item from order then refreshes the list to update values
+		OLbtnRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OrderController.RemoveItem(OrderController.orderid, OrderController.itemid);
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							OLframe.setVisible(false);
+							OLframe.dispose();
+							new GUI("OrderList");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		
 		
 		
 		OLframe.setVisible(true);
 	}
-	
+	//Initialize variables for OrderItem frame
 	private JFrame OIframe;
 	private final JPanel OIpanel = new JPanel();
 	private final JPanel OIpanel1 = new JPanel();
@@ -677,8 +902,9 @@ public class GUI {
 	private final JButton OIbtnCancel = new JButton("Cancel");
 	private final JButton OIbtnOK = new JButton("OK");
 	
-	
+	//initializes the OrderItem frame
 	private void initializeOI() {
+		//creates and sets the properties of buttons, panels, and labels
 		OItxtNotes.setColumns(10);
 		OItxtAllergy.setColumns(10);
 		OItxtSide.setColumns(10);
@@ -824,7 +1050,7 @@ public class GUI {
 		gbc_OIbtnCancel.gridy = 0;
 		OIpanel5.add(OIbtnCancel, gbc_OIbtnCancel);
 		
-		
+		//closes the current window and opens the previous window
 		OIbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				OIframe.setVisible(false);
@@ -832,16 +1058,41 @@ public class GUI {
 				initializeOL();
 			}
 		});
+		//sets the current item to the new attributes entered in the text fields then closes current window and opens the previous one
+		OIbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ItemType item = new ItemType();
+				item.id = OrderController.itemid;
+				item.orderid = OrderController.orderid;
+				item.discount = Float.parseFloat(OItxtDiscount.getText());
+				item.name = OItxtItem.getText();
+				item.side = OItxtSide.getText();
+				item.allergy = OItxtAllergy.getText();
+				item.notes = OItxtNotes.getText();
+				
+				OrderController.SetItem(item);
+				
+				OIframe.setVisible(false);
+				OIframe.dispose();
+				initializeOL();
+			}
+		});
 		
+		//populate the text fields with the currently looked at item
+		OItxtItem.setText(OrderController.item.name);
+		OItxtSide.setText(OrderController.item.side);
+		OItxtAllergy.setText(OrderController.item.allergy);
+		OItxtNotes.setText(OrderController.item.notes);
+		OItxtDiscount.setText(Float.toString(OrderController.item.discount));
 		
 		
 		
 		OIframe.setVisible(true);
 	}
 	
-	
+	//initialize variables for MenuList window
 	private JFrame MLframe;
-	private final JList MLlist = new JList();
+	private final JList<String> MLlist = new JList<String>();
 	private final JButton MLbtnAdd = new JButton("Add");
 	private final JButton MLbtnRemove = new JButton("Remove");
 	private final JButton MLbtnEdit = new JButton("Edit");
@@ -849,8 +1100,9 @@ public class GUI {
 	private final JButton MLbtnOK = new JButton("OK");
 	private final JButton MLbtnCancel = new JButton("Cancel");
 	
-	
+	//initialize menu list
 	private void initializeML() {
+		//create and set properties of buttons and list
 		MLframe = new JFrame();
 		MLframe.setBounds(100, 100, 786, 474);
 		MLframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -878,6 +1130,50 @@ public class GUI {
 		MLframe.getContentPane().add(MLbtnCancel);
 		
 		
+		
+		//get list of menu items and convert to string to be put in JList
+		MenuType[] items = MenuController.getMenu();
+		String[] itemList = new String[items.length+1];
+		itemList[0] = String.format("%-15s %-15s %-15s %-15s", "ID", "Name", "Category", "Price");
+		for (int i=0;i<items.length;i++) {
+			itemList[i+1] = String.format("%-15d %-15s %-15s %-15.2f", items[i].id, items[i].name, items[i].category, items[i].price);
+		}
+		//List Selection Listener to get currently selected menu id, get the menu item from menu list and store the menu item in MenuController
+		MLlist.addListSelectionListener(new ListSelectionListener() {
+		    public void valueChanged(ListSelectionEvent event) {
+		        if (!event.getValueIsAdjusting()){
+		        	String temp = MLlist.getSelectedValue();
+		            MenuController.menuid = Integer.parseInt(temp.substring(0,temp.indexOf(" ")));
+		            for (int i=0;i<items.length;i++) {
+		            	if (items[i].id == MenuController.menuid) {
+		            		MenuController.menu = items[i];
+		            	}
+		            }
+		        }
+		    }
+		});
+		
+		
+		MLlist.setListData(itemList);
+		
+		//Remove Button - removes menu item and refreshes list
+		MLbtnRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MenuController.removefromMenu(MenuController.menu);
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							MLframe.setVisible(false);
+							MLframe.dispose();
+							new GUI("MenuList");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		//Cancel Button - Close current window and open previous window
 		MLbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				MLframe.setVisible(false);
@@ -885,17 +1181,42 @@ public class GUI {
 				initialize();
 			}
 		});
-		
+		//OK Button - Close current window and open previous window
+		MLbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MLframe.setVisible(false);
+				MLframe.dispose();
+				initialize();
+			}
+		});
+		//Edit Button - Close current window and open MenuItem window while retaining stored values in MenuController
 		MLbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				System.out.print(MenuController.menu.id);
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
 							MLframe.setVisible(false);
 							MLframe.dispose();
 							new GUI("MenuItem");
-					
-							
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		//Add Button - Reset stored data in MenuController and close current window and open MenuItem window 
+		MLbtnAdd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MenuController.menuid = -1;
+				MenuController.menu = new MenuType("","","y",0,0);
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							MLframe.setVisible(false);
+							MLframe.dispose();
+							new GUI("MenuItem");
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -907,7 +1228,7 @@ public class GUI {
 		MLframe.setVisible(true);
 	}
 	
-	
+	//Initialize variables for MenuItems frame
 	private JFrame MIframe;
 	private final JLabel MIlblMenuItem = new JLabel("Menu Item");
 	private final JLabel MIlblName = new JLabel("Name");
@@ -916,9 +1237,12 @@ public class GUI {
 	private final JTextField MItxtPrice = new JTextField();
 	private final JButton MIbtnOK = new JButton("OK");
 	private final JButton MIbtnCancel = new JButton("Cancel");
+	private final JLabel MIlblCategory = new JLabel("Category");
+	private final JTextField MItxtCategory = new JTextField();
 	
-	
+	//Initialize MenuItem window
 	private void initializeMI() {
+		//create and set property of MenuItem variables
 		MItxtPrice.setBounds(23, 145, 96, 20);
 		MItxtPrice.setColumns(10);
 		MItxtName.setBounds(23, 89, 96, 20);
@@ -947,10 +1271,35 @@ public class GUI {
 		MIbtnCancel.setBounds(335, 216, 89, 23);
 		
 		MIframe.getContentPane().add(MIbtnCancel);
+		MIlblCategory.setBounds(167, 73, 48, 14);
 		
+		MIframe.getContentPane().add(MIlblCategory);
+		MItxtCategory.setColumns(10);
+		MItxtCategory.setBounds(166, 89, 96, 20);
 		
+		MIframe.getContentPane().add(MItxtCategory);
+		
+		//load the properties from MenuController MenuItem into text fields
+		MItxtName.setText(MenuController.menu.name);
+		MItxtCategory.setText(MenuController.menu.category);
+		MItxtPrice.setText(Float.toString(MenuController.menu.price));
+		//Cancel Button - closes current window and opens previous window
 		MIbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				MIframe.setVisible(false);
+				MIframe.dispose();
+				initializeML();
+			}
+		});
+		//OK Button - Sets MenuController menu to new  values in text field then sets the menu properties in the database. Closes current window and opens previous
+		MIbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MenuController.menu.name = MItxtName.getText();
+				MenuController.menu.category = MItxtCategory.getText();
+				MenuController.menu.price = Float.parseFloat(MItxtPrice.getText());
+				
+				MenuController.setMenuItem(MenuController.menu);
+				
 				MIframe.setVisible(false);
 				MIframe.dispose();
 				initializeML();
@@ -960,9 +1309,9 @@ public class GUI {
 		MIframe.setVisible(true);
 	}
 	
-	
+	//Initialize ReservationList variables
 	private JFrame RLframe;
-	private final JList RLlist = new JList();
+	private final JList<String> RLlist = new JList<String>();
 	private final JButton RLbtnAdd = new JButton("Add");
 	private final JButton RLbtnRemove = new JButton("Remove");
 	private final JButton RLbtnEdit = new JButton("Edit");
@@ -970,7 +1319,7 @@ public class GUI {
 	private final JButton RLbtnOK = new JButton("OK");
 	private final JButton RLbtnCancel = new JButton("Cancel");
 	
-	
+	//initializes ReservationList window
 	private void initializeRL() {
 		RLframe = new JFrame();
 		RLframe.setBounds(100, 100, 786, 474);
@@ -998,7 +1347,27 @@ public class GUI {
 		
 		RLframe.getContentPane().add(RLbtnCancel);
 		
+		//get list of bookings from database and convert to string to be displayed in list
+		BookingInfo[] bookings = ReservationsDatabase.getBookings();
+		String[] itemList = new String[bookings.length+1];
+		itemList[0] = String.format("%-15s %-15s %-15s %-15s", "ID", "Name", "Date", "Time");
+		for (int i=0;i<bookings.length;i++) {
+			itemList[i+1] = String.format("%-15d %-15s %-15s %-15s", bookings[i].id, bookings[i].name, bookings[i].date, bookings[i].time);
+		}
+		//Selection Listener tracks current selected item and stores the booking id in ReservationsDatabase for later
+		RLlist.addListSelectionListener(new ListSelectionListener() {
+		    public void valueChanged(ListSelectionEvent event) {
+		        if (!event.getValueIsAdjusting()){
+		        	String temp = RLlist.getSelectedValue();
+		            ReservationsDatabase.bookingid = Integer.parseInt(temp.substring(0,temp.indexOf(" ")));
+		        }
+		    }
+		});
 		
+		
+		RLlist.setListData(itemList);
+		
+		//Cancel Button - closes current window and opens previous window
 		RLbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				RLframe.setVisible(false);
@@ -1006,18 +1375,60 @@ public class GUI {
 				initialize();
 			}
 		});
+		//OK Button - closes current window and opens previous window
+		RLbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				RLframe.setVisible(false);
+				RLframe.dispose();
+				initialize();
+			}
+		});
 		
-		
+		//Edit Button - gets reservation with bookingid and stores in ReservationsDatabase. closes current window and opens ReservationEdit window
 		RLbtnEdit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				ReservationsDatabase.booking = ReservationsDatabase.getBooking(ReservationsDatabase.bookingid);
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
 							RLframe.setVisible(false);
 							RLframe.dispose();
 							new GUI("ReservationEdit");
-					
-							
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		//Add Button - clears booking in ReservationDatabase and sets bookingid to -1. closes current window and opens ReservationEdit window
+		RLbtnAdd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ReservationsDatabase.booking = new BookingInfo();
+				ReservationsDatabase.bookingid = -1;
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							RLframe.setVisible(false);
+							RLframe.dispose();
+							new GUI("ReservationEdit");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		});
+		//Remove Button - removes the selected booking from the reservation data. refreshes the window to update list
+		RLbtnRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ReservationsDatabase.removeBooking(ReservationsDatabase.bookingid);
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							RLframe.setVisible(false);
+							RLframe.dispose();
+							new GUI("ReservationList");
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -1029,7 +1440,7 @@ public class GUI {
 		RLframe.setVisible(true);
 	}
 	
-	
+	//initializes variables for ReservationsEdit frame
 	private JFrame REframe;
 	private final JPanel REpanel = new JPanel();
 	private final JPanel REpanel1 = new JPanel();
@@ -1055,8 +1466,9 @@ public class GUI {
 	private final JButton REbtnCancel = new JButton("Cancel");
 	private final JButton REbtnOK = new JButton("OK");
 	
-	
+	//initializes ReservationEdit window
 	private void initializeRE() {
+		//creates and sets properties of panels, labels, buttons, and text fields
 		REtxtNotes.setColumns(10);
 		REtxtTime.setColumns(10);
 		REtxtPeople.setColumns(10);
@@ -1231,7 +1643,42 @@ public class GUI {
 		gbc_REbtnCancel.gridy = 0;
 		REpanel5.add(REbtnCancel, gbc_REbtnCancel);
 		
+		//populates text fields with selected Booking in ReservationsDatabase
+		REtxtName.setText(ReservationsDatabase.booking.name);
+		REtxtPeople.setText(Integer.toString(ReservationsDatabase.booking.size));
+		REtxtEmail.setText(ReservationsDatabase.booking.email);
+		REtxtPhone.setText(ReservationsDatabase.booking.phone);
+		REtxtNotes.setText(ReservationsDatabase.booking.notes);
+		REtxtDate.setText(ReservationsDatabase.booking.date);
+		REtxtTime.setText(ReservationsDatabase.booking.time);
 		
+		//OK Button - set booking object with new properties in text boxes, then adds or sets object in database
+		REbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				ReservationsDatabase.booking.name = REtxtName.getText();
+				ReservationsDatabase.booking.notes = REtxtNotes.getText();
+				ReservationsDatabase.booking.email = REtxtEmail.getText();
+				ReservationsDatabase.booking.phone = REtxtPhone.getText();
+				ReservationsDatabase.booking.size = Integer.parseInt(REtxtPeople.getText());
+				ReservationsDatabase.booking.date = REtxtDate.getText();
+				ReservationsDatabase.booking.time = REtxtTime.getText();
+				//if bookingid == -1, the add button was pressed so it is inserted instead of updated
+				if (ReservationsDatabase.bookingid == -1) {	
+					ReservationsDatabase.addBooking(ReservationsDatabase.booking);
+				}
+				else {
+					ReservationsDatabase.setBooking(ReservationsDatabase.booking);
+				}
+				
+				
+				REframe.setVisible(false);
+				REframe.dispose();
+				initializeRL();
+			}
+		});
+		
+		//Cancel Button - close current window and open previous window
 		REbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				REframe.setVisible(false);
@@ -1245,7 +1692,7 @@ public class GUI {
 		REframe.setVisible(true);
 	}
 	
-	
+	//initializes variables for Table buttons
 	private JFrame Tframe;
 	private final JToggleButton Ttgl1 = new JToggleButton("1");
 	private final JToggleButton Ttgl2 = new JToggleButton("2");
@@ -1265,69 +1712,76 @@ public class GUI {
 	private final JButton TbtnBusy = new JButton("Busy");
 	private final JButton TbtnOk = new JButton("OK");
 	private final JButton TbtnCancel = new JButton("Cancel");
+	private boolean busy_selected = false;
+	private boolean ready_selected = false;
+	private boolean dirty_selected = false;
 	
-	
+	//initializes Tables window
 	private void initializeT() {
+		//get data from database and assign integers to a color
+		Color[] colors = new Color[] {Color.GREEN, Color.YELLOW, Color.RED};
+		TablesInfo tables = TablesDatabase.getTables();
+		//create and set properties of buttons
 		Tframe = new JFrame();
 		Tframe.setBounds(100, 100, 764, 433);
 		Tframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Tframe.getContentPane().setLayout(null);
 		Ttgl1.setOpaque(true);
-		Ttgl1.setBackground(Color.RED);
+		Ttgl1.setBackground(colors[tables.T1]);
 		Ttgl1.setBounds(47, 88, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl1);
 		Ttgl2.setOpaque(true);
-		Ttgl2.setBackground(Color.RED);
+		Ttgl2.setBackground(colors[tables.T2]);
 		Ttgl2.setBounds(193, 88, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl2);
-		Ttgl3.setBackground(Color.GREEN);
+		Ttgl3.setBackground(colors[tables.T3]);
 		Ttgl3.setOpaque(true);
 		Ttgl3.setBounds(341, 88, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl3);
-		Ttgl4.setBackground(Color.GREEN);
+		Ttgl4.setBackground(colors[tables.T4]);
 		Ttgl4.setOpaque(true);
 		Ttgl4.setBounds(47, 149, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl4);
-		Ttgl5.setBackground(Color.YELLOW);
+		Ttgl5.setBackground(colors[tables.T5]);
 		Ttgl5.setOpaque(true);
 		Ttgl5.setBounds(193, 149, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl5);
-		Ttgl6.setBackground(Color.RED);
+		Ttgl6.setBackground(colors[tables.T6]);
 		Ttgl6.setOpaque(true);
 		Ttgl6.setBounds(341, 149, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl6);
-		Ttgl7.setBackground(Color.GREEN);
+		Ttgl7.setBackground(colors[tables.T7]);
 		Ttgl7.setOpaque(true);
 		Ttgl7.setBounds(47, 209, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl7);
-		Ttgl8.setBackground(Color.GREEN);
+		Ttgl8.setBackground(colors[tables.T8]);
 		Ttgl8.setOpaque(true);
 		Ttgl8.setBounds(193, 209, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl8);
-		Ttgl9.setBackground(Color.GREEN);
+		Ttgl9.setBackground(colors[tables.T9]);
 		Ttgl9.setOpaque(true);
 		Ttgl9.setBounds(341, 209, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl9);
-		Ttgl10.setBackground(Color.RED);
+		Ttgl10.setBackground(colors[tables.T10]);
 		Ttgl10.setOpaque(true);
 		Ttgl10.setBounds(47, 271, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl10);
-		Ttgl11.setBackground(Color.YELLOW);
+		Ttgl11.setBackground(colors[tables.T11]);
 		Ttgl11.setOpaque(true);
 		Ttgl11.setBounds(193, 271, 123, 40);
 		
 		Tframe.getContentPane().add(Ttgl11);
-		Ttgl12.setBackground(Color.YELLOW);
+		Ttgl12.setBackground(colors[tables.T12]);
 		Ttgl12.setOpaque(true);
 		Ttgl12.setBounds(341, 271, 123, 40);
 		
@@ -1355,7 +1809,208 @@ public class GUI {
 		
 		Tframe.getContentPane().add(TbtnCancel);
 		
-		
+		//set ready to true to change color to green
+		TbtnReady.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				busy_selected = false;
+				ready_selected = true;
+				dirty_selected = false;
+			}
+		});
+		//set busy to true to set color to red
+		TbtnBusy.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				busy_selected = true;
+				ready_selected = false;
+				dirty_selected = false;
+			}
+		});
+		//set dirty to true to set color to yellow
+		TbtnDirty.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				busy_selected = false;
+				ready_selected = false;
+				dirty_selected = true;
+			}
+		});
+		//listeners for all buttons that changes the color to selected color
+		Ttgl1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl1.setBackground(Color.RED);
+					tables.T1 = 2;
+				} else if (ready_selected) {
+					Ttgl1.setBackground(Color.GREEN);
+					tables.T1 = 0;
+				} else if (dirty_selected) {
+					Ttgl1.setBackground(Color.YELLOW);
+					tables.T1 = 1;
+				}
+			}
+		});
+		Ttgl2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl2.setBackground(Color.RED);
+					tables.T2 = 2;
+				} else if (ready_selected) {
+					Ttgl2.setBackground(Color.GREEN);
+					tables.T2 = 0;
+				} else if (dirty_selected) {
+					Ttgl2.setBackground(Color.YELLOW);
+					tables.T2 = 1;
+				}
+			}
+		});
+		Ttgl3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl3.setBackground(Color.RED);
+					tables.T3 = 2;
+				} else if (ready_selected) {
+					Ttgl3.setBackground(Color.GREEN);
+					tables.T3 = 0;
+				} else if (dirty_selected) {
+					Ttgl3.setBackground(Color.YELLOW);
+					tables.T3 = 1;
+				}
+			}
+		});
+		Ttgl4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl4.setBackground(Color.RED);
+					tables.T4 = 2;
+				} else if (ready_selected) {
+					Ttgl4.setBackground(Color.GREEN);
+					tables.T4 = 0;
+				} else if (dirty_selected) {
+					Ttgl4.setBackground(Color.YELLOW);
+					tables.T4 = 1;
+				}
+			}
+		});
+		Ttgl5.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl5.setBackground(Color.RED);
+					tables.T5 = 2;
+				} else if (ready_selected) {
+					Ttgl5.setBackground(Color.GREEN);
+					tables.T5 = 0;
+				} else if (dirty_selected) {
+					Ttgl5.setBackground(Color.YELLOW);
+					tables.T5 = 1;
+				}
+			}
+		});
+		Ttgl6.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl6.setBackground(Color.RED);
+					tables.T6 = 2;
+				} else if (ready_selected) {
+					Ttgl6.setBackground(Color.GREEN);
+					tables.T6 = 0;
+				} else if (dirty_selected) {
+					Ttgl6.setBackground(Color.YELLOW);
+					tables.T6 = 1;
+				}
+			}
+		});
+		Ttgl7.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl7.setBackground(Color.RED);
+					tables.T7 = 2;
+				} else if (ready_selected) {
+					Ttgl7.setBackground(Color.GREEN);
+					tables.T7 = 0;
+				} else if (dirty_selected) {
+					Ttgl7.setBackground(Color.YELLOW);
+					tables.T7 = 1;
+				}
+			}
+		});
+		Ttgl8.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl8.setBackground(Color.RED);
+					tables.T8 = 2;
+				} else if (ready_selected) {
+					Ttgl8.setBackground(Color.GREEN);
+					tables.T8 = 0;
+				} else if (dirty_selected) {
+					Ttgl8.setBackground(Color.YELLOW);
+					tables.T8 = 1;
+				}
+			}
+		});
+		Ttgl9.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl9.setBackground(Color.RED);
+					tables.T9 = 2;
+				} else if (ready_selected) {
+					Ttgl9.setBackground(Color.GREEN);
+					tables.T9 = 0;
+				} else if (dirty_selected) {
+					Ttgl9.setBackground(Color.YELLOW);
+					tables.T9 = 1;
+				}
+			}
+		});
+		Ttgl10.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl10.setBackground(Color.RED);
+					tables.T10 = 2;
+				} else if (ready_selected) {
+					Ttgl10.setBackground(Color.GREEN);
+					tables.T10 = 0;
+				} else if (dirty_selected) {
+					Ttgl10.setBackground(Color.YELLOW);
+					tables.T10 = 1;
+				}
+			}
+		});
+		Ttgl11.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl11.setBackground(Color.RED);
+					tables.T11 = 2;
+				} else if (ready_selected) {
+					Ttgl11.setBackground(Color.GREEN);
+					tables.T11 = 0;
+				} else if (dirty_selected) {
+					Ttgl11.setBackground(Color.YELLOW);
+					tables.T11 = 1;
+				}
+			}
+		});
+		Ttgl12.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (busy_selected) {
+					Ttgl12.setBackground(Color.RED);
+					tables.T12 = 2;
+				} else if (ready_selected) {
+					Ttgl12.setBackground(Color.GREEN);
+					tables.T12 = 0;
+				} else if (dirty_selected) {
+					Ttgl12.setBackground(Color.YELLOW);
+					tables.T12 = 1;
+				}
+			}
+		});
+
+		TbtnOk.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				TablesDatabase.addTables(tables);
+				Tframe.setVisible(false);
+				Tframe.dispose();
+				initialize();
+			}
+		});
 		TbtnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Tframe.setVisible(false);
@@ -1366,6 +2021,72 @@ public class GUI {
 		
 		
 		Tframe.setVisible(true);
+	}
+	//initializes variables for Login window
+	private JFrame Lframe;
+	private final JLabel LlblLogin = new JLabel("Login");
+	private final JLabel LlblUser = new JLabel("User ID");
+	private final JTextField LtxtUser = new JTextField();
+	private final JLabel LlblPassword = new JLabel("Password");
+	private final JTextField LtxtPassword = new JPasswordField();
+	private final JButton LbtnOK = new JButton("OK");
+	
+	//initializes Login window
+	private void initializeL() {
+		//create and set properties of buttons and labels
+		LtxtUser.setBounds(124, 110, 178, 20);
+		LtxtUser.setColumns(10);
+		Lframe = new JFrame();
+		Lframe.setBounds(100, 100, 450, 300);
+		Lframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		Lframe.getContentPane().setLayout(null);
+		LlblLogin.setHorizontalAlignment(SwingConstants.CENTER);
+		LlblLogin.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		LlblLogin.setBounds(34, 45, 355, 39);
+		
+		Lframe.getContentPane().add(LlblLogin);
+		LlblUser.setBounds(124, 95, 63, 14);
+		
+		Lframe.getContentPane().add(LlblUser);
+		
+		Lframe.getContentPane().add(LtxtUser);
+		LlblPassword.setBounds(124, 141, 126, 14);
+		
+		Lframe.getContentPane().add(LlblPassword);
+		LtxtPassword.setBounds(124, 155, 178, 20);
+		
+		Lframe.getContentPane().add(LtxtPassword);
+		LbtnOK.setBounds(320, 216, 89, 23);
+		
+		Lframe.getContentPane().add(LbtnOK);
+		
+		//OK Button - compares password field to stored password to validate login
+		LbtnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				EmployeeType employee = EmployeeDatabase.getEmployee(Integer.parseInt(LtxtUser.getText()));
+				if (EmployeeDatabase.comparePassword(employee,LtxtPassword.getText())){
+					EventQueue.invokeLater(new Runnable() {
+						public void run() {
+							try {
+								Lframe.setVisible(false);
+								Lframe.dispose();
+								new GUI("");
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
+				}
+				else {
+					//if incorrect, notify user
+					LlblLogin.setText("Incorrect Login: Try Again");
+				}
+				
+			}
+		});
+		
+		
+		Lframe.setVisible(true);
 	}
 	
 }

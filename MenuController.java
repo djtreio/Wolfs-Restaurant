@@ -1,27 +1,57 @@
+package CP317;
+
 
 public class MenuController {
-	private static final String ConnectionString = "jdbc:sqlite:/Users/braedensmith/Desktop/Wolfs.db";
+
+	public static String itemName;
+	public static int menuid;
+	public static MenuType menu;
+	
 	
 	public static void main(String[] args) {
 		
 	}
 	
 	//Changes status of an item to y(meaning on menu)
+	//Params: Item to add to menu
+	//Returns: void
 	public static void addToMenu(MenuType item) {
+		//Change status of item
 		item.editItem("status", "y");
-		MenuType newitem = MenuDatabase.getMenuItem(item.name);
-		
-		//Add newitem to GUI(Jackson, let me know when you get here I'll help implement this. Not sure how do to it since you've made the GUI
+		//Add to menu
+		MenuDatabase.addMenuItem(item);
 		
 	}
 	
+	//Sets the variables of an item on the menu
+	//Params: Item to set variables of
+	//Returns: void
+	public static void setMenuItem(MenuType item) {
+		//Check if item is not on menu
+		if (menuid == -1) {
+			addToMenu(item);
+
+		}
+		//Edit the variabels
+		else {
+			item.editItem("name", item.name);
+			item.editItem("category", item.category);
+			item.editItem("price", Float.toString(item.price));
+		}
+	}
+	
+	//Removes an item from the menu
+	//Params: Item to remove from menu
+	//Returns: void
 	public static void removefromMenu(MenuType item) {
 		item.editItem("status", "n");
-		//Fix GUI
 	}
 	
-	public static void getMenu() {
+	//Retrieves list of items that should be on menu
+	//Params: None
+	//Returns: array of MenuType items, containing menu items
+	public static MenuType[] getMenu() {
 		MenuType[] menuItems = MenuDatabase.getMenuItems();
-		//Place at appropriate spot on GUI
+		return menuItems;
 	}
 }
