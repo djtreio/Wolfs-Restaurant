@@ -39,13 +39,15 @@ public class MenuDatabase {
 		toRemove.removeItem();
 	}
 	
-	//GOOD
 	//Adds a menutype item to the menu database
+	//Params: Item to be added to menu database
+	//Returns: void
 	public static void addMenuItem(MenuType menuItem) {
 		try {
 			
 		Connection conn = databaseConnect();
 		
+		//Prepare sql statement to add a row in the database
 		String sql = "INSERT INTO Menu (price, cost, name, category) VALUES (?, ?, ?, ?)";
 		
 		PreparedStatement statement = conn.prepareStatement(sql);
@@ -54,6 +56,7 @@ public class MenuDatabase {
 		statement.setString(3, menuItem.name);
 		statement.setString(4, menuItem.category);
 		
+		//Execute statement
 		statement.executeUpdate();
 		
 		statement.close();
@@ -65,14 +68,16 @@ public class MenuDatabase {
 		}
 	}
 	
-	//GOOD
 	//Retrieves a menutype item from the database
+	//Params: id of item to be retrieved
+	//Returns: Menutype item of the item to be returned, or null if it not found
 	public static MenuType getMenuItem(int id) {
 		MenuType menuItem = new MenuType("Null","","n",0,0);
 
 		try {
 			Connection conn = databaseConnect();
-	
+			
+			//prepare sql statement
 			String sql = "SELECT * FROM Menu WHERE id = ?";
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setInt(1, id);
@@ -86,7 +91,7 @@ public class MenuDatabase {
 			menuItem.status = result.getString("status");
 			menuItem.cost = result.getFloat("cost");
 
-			
+			//Print error message if item is not found in database
 			if (menuItem.id == 0) {
 				System.out.println("No menu item found with name " + Integer.toString(id));
 			}
@@ -103,13 +108,16 @@ public class MenuDatabase {
 		}
 	}
 	
-	
+	//Returns a Menu item using its name
+	//Params: Name of menu item
+	//Returns: Menu item that was requested, or null if not found
 	public static MenuType getMenuItem(String name) {
 		MenuType menuItem = new MenuType("Null","","n",0,0);
 
 		try {
 			Connection conn = databaseConnect();
-	
+			
+			//prepare sql statement
 			String sql = "SELECT * FROM Menu WHERE name = ?";
 			PreparedStatement statement = conn.prepareStatement(sql);
 			statement.setString(1, name);
@@ -123,7 +131,7 @@ public class MenuDatabase {
 			menuItem.status = result.getString("status");
 			menuItem.cost = result.getFloat("cost");
 
-			
+			//Print error message if not found
 			if (menuItem.id == 0) {
 				System.out.println("No menu item found with name " + name);
 			}
@@ -140,13 +148,15 @@ public class MenuDatabase {
 		}
 	}
 	
-	//GOOD
 	//Retrieves all menu items that should be on the menu
+	//Params: None
+	//Returns: Array with all menutype items that should be on the menu(status = y)
 	public static MenuType[] getMenuItems() {
 		try {
 			Connection conn = databaseConnect();
 			Statement statement = conn.createStatement();
 			
+			//Prepare sql statement
 			String sql = "SELECT COUNT(*) FROM Menu WHERE status = \"y\"";
 			ResultSet result = statement.executeQuery(sql);
 			int count = result.getInt(1);
@@ -159,6 +169,7 @@ public class MenuDatabase {
 			
 			result = statement.executeQuery(sql);
 			
+			//Place items in an array
 			int i = 0;
 			while (result.next()) {
 				menuItems[i] = new MenuType(result.getString("name"),result.getString("category"),result.getString("status"),result.getFloat("price"),result.getFloat("cost"));
@@ -179,6 +190,8 @@ public class MenuDatabase {
 	}
 	
 	//Connects to the database
+	//Params: None, uses ConnectionString
+	//Returns: database connection item
 	public static Connection databaseConnect() {
         try {
         	Class.forName("org.sqlite.JDBC");
